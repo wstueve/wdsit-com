@@ -161,6 +161,5 @@ Breakpoints:
 ## 📧 Contact
 
 - **Website**: [wdsit.com](https://wdsit.com)
-- **Email**: privacy@wds-it.com
-- **Phone**: 913.839.2228
+- **Email**: support@wds-it.com
 - **Location**: Olathe, Kansas

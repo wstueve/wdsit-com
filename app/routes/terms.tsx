@@ -127,8 +127,7 @@ export default function Terms() {
               For questions about these Terms, please contact us:
             </p>
             <div className="bg-white/80 dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700">
-              <p className="text-gray-700 dark:text-gray-300 mb-2"><strong>Email:</strong> <a href="mailto:legal@wds-it.com" className="text-primary-600 dark:text-primary-400 hover:underline">legal@wds-it.com</a></p>
-              <p className="text-gray-700 dark:text-gray-300 mb-2"><strong>Phone:</strong> <a href="tel:+19138392228" className="text-primary-600 dark:text-primary-400 hover:underline">913.839.2228</a></p>
+              <p className="text-gray-700 dark:text-gray-300 mb-2"><strong>Email:</strong> <a href="mailto:support@wds-it.com" className="text-primary-600 dark:text-primary-400 hover:underline">support@wds-it.com</a></p>
               <p className="text-gray-700 dark:text-gray-300"><strong>Address:</strong> WDS IT, LLC, Olathe, KS</p>
             </div>
           </section>

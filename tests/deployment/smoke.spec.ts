@@ -130,9 +130,7 @@ test.describe("Deployment Smoke Tests", () => {
     const mainContent = page.getByTestId("main-content");
 
     // Verify business contact details
-    await expect(mainContent.getByText("913.839.2228")).toBeVisible();
-    await expect(mainContent.getByText("privacy@wds-it.com")).toBeVisible();
-    await expect(mainContent.getByText("legal@wds-it.com")).toBeVisible();
+    await expect(mainContent.getByText("support@wds-it.com")).toBeVisible();
     await expect(mainContent.getByText("Olathe, Kansas")).toBeVisible();
   });
 

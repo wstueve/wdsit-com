@@ -118,12 +118,8 @@ test.describe("Contact Form", () => {
 
     const mainContent = page.getByTestId("main-content");
 
-    // Phone number
-    await expect(mainContent.getByRole("link", { name: "913.839.2228" })).toBeVisible();
-
-    // Email addresses
-    await expect(mainContent.getByRole("link", { name: "privacy@wds-it.com" })).toBeVisible();
-    await expect(mainContent.getByRole("link", { name: "legal@wds-it.com" })).toBeVisible();
+    // Email address
+    await expect(mainContent.getByRole("link", { name: "support@wds-it.com" })).toBeVisible();
 
     // Location
     await expect(mainContent.getByText("Olathe, Kansas")).toBeVisible();
@@ -136,15 +132,7 @@ test.describe("Contact Form", () => {
     await page.goto("/contact");
 
     const mainContent = page.getByTestId("main-content");
-    const emailLink = mainContent.getByRole("link", { name: "privacy@wds-it.com" });
-    await expect(emailLink).toHaveAttribute("href", "mailto:privacy@wds-it.com");
-  });
-
-  test("phone link should work", async ({ page }) => {
-    await page.goto("/contact");
-
-    const mainContent = page.getByTestId("main-content");
-    const phoneLink = mainContent.getByRole("link", { name: "913.839.2228" });
-    await expect(phoneLink).toHaveAttribute("href", "tel:+19138392228");
+    const emailLink = mainContent.getByRole("link", { name: "support@wds-it.com" });
+    await expect(emailLink).toHaveAttribute("href", "mailto:support@wds-it.com");
   });
 });

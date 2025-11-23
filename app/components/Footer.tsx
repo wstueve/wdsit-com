@@ -29,26 +29,10 @@ export function Footer() {
             <ul className="space-y-2 text-sm">
               <li>
                 <a
-                  href="tel:+19138392228"
+                  href="mailto:support@wds-it.com"
                   className="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400"
                 >
-                  913.839.2228
-                </a>
-              </li>
-              <li>
-                <a
-                  href="mailto:privacy@wds-it.com"
-                  className="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400"
-                >
-                  privacy@wds-it.com
-                </a>
-              </li>
-              <li>
-                <a
-                  href="mailto:legal@wds-it.com"
-                  className="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400"
-                >
-                  legal@wds-it.com
+                  support@wds-it.com
                 </a>
               </li>
             </ul>
