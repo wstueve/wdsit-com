@@ -8,6 +8,7 @@ import {
 } from "react-router";
 
 import type { Route } from "./+types/root";
+import { ThemeProvider } from "./contexts/ThemeContext";
 import "./app.css";
 
 export const links: Route.LinksFunction = () => [
@@ -71,7 +72,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
     </html>
   );
 }export default function App() {
-	return <Outlet />;
+	return (
+		<ThemeProvider>
+			<Outlet />
+		</ThemeProvider>
+	);
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {

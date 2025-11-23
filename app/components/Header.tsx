@@ -31,12 +31,11 @@ export function Header() {
           {/* Desktop Navigation & Theme Toggle */}
           <div className="hidden lg:flex lg:items-center lg:gap-6">
             <Navigation />
-            <ThemeToggle testId="desktop-theme-toggle" />
+            <ThemeToggle variant="desktop" testId="desktop-theme-toggle" />
           </div>
 
           {/* Mobile Menu Button */}
           <div className="flex items-center gap-4 lg:hidden">
-            <ThemeToggle testId="mobile-theme-toggle" />
             <button
               type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -77,8 +76,11 @@ export function Header() {
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="lg:hidden pb-4" data-testid="mobile-menu">
+          <div className="lg:hidden pb-4 space-y-4" data-testid="mobile-menu">
             <Navigation mobile onLinkClick={() => setMobileMenuOpen(false)} />
+            <div className="pt-4 border-t border-gray-200 dark:border-gray-800">
+              <ThemeToggle variant="mobile" testId="mobile-theme-toggle" />
+            </div>
           </div>
         )}
       </div>

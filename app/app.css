@@ -142,11 +142,22 @@ body {
   }
   
   body {
-    @apply bg-white text-black;
+    @apply bg-white text-black font-bold text-lg;
   }
   
   * {
     @apply border-black;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-extrabold;
+  }
+  
+  button:not(.inline-flex):not([role="button"]),
+  a[class*="bg-"],
+  a[class*="border-2"],
+  a[class*="border-4"] {
+    border-width: 4px;
   }
 }
 
@@ -167,11 +178,59 @@ body {
 }
 
 [data-theme="high-contrast"] body {
-  @apply bg-white text-black;
+  @apply bg-white text-black font-bold;
+  font-size: 1.125rem; /* 18px base font size (+2px from 16px) */
 }
 
 [data-theme="high-contrast"] * {
   @apply border-black;
+}
+
+[data-theme="high-contrast"] h1 {
+  @apply font-extrabold;
+  font-size: 3.25rem; /* 52px (+4px) */
+}
+
+[data-theme="high-contrast"] h2 {
+  @apply font-extrabold;
+  font-size: 2.5rem; /* 40px (+4px) */
+}
+
+[data-theme="high-contrast"] h3 {
+  @apply font-extrabold;
+  font-size: 2rem; /* 32px (+2px) */
+}
+
+[data-theme="high-contrast"] h4 {
+  @apply font-extrabold;
+  font-size: 1.625rem; /* 26px (+2px) */
+}
+
+[data-theme="high-contrast"] h5 {
+  @apply font-extrabold;
+  font-size: 1.375rem; /* 22px (+2px) */
+}
+
+[data-theme="high-contrast"] h6 {
+  @apply font-extrabold;
+  font-size: 1.25rem; /* 20px (+2px) */
+}
+
+[data-theme="high-contrast"] button:not(.inline-flex),
+[data-theme="high-contrast"] a[class*="bg-"],
+[data-theme="high-contrast"] a[class*="border-"],
+[data-theme="high-contrast"] a[class*="px-"],
+[data-theme="high-contrast"] [role="button"] {
+  border-width: 4px !important;
+  border-style: solid !important;
+  @apply border-black;
+}
+
+[data-theme="high-contrast"] input,
+[data-theme="high-contrast"] textarea,
+[data-theme="high-contrast"] select {
+  border-width: 4px;
+  @apply border-black bg-white text-black;
 }
 
 /* Focus Styles */
