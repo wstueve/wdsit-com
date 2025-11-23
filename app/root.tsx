@@ -1,47 +1,59 @@
 import {
-	isRouteErrorResponse,
-	Links,
-	Meta,
-	Outlet,
-	Scripts,
-	ScrollRestoration,
+  isRouteErrorResponse,
+  Links,
+  Meta,
+  Outlet,
+  Scripts,
+  ScrollRestoration,
 } from "react-router";
 
 import type { Route } from "./+types/root";
 import "./app.css";
 
 export const links: Route.LinksFunction = () => [
-	{ rel: "preconnect", href: "https://fonts.googleapis.com" },
-	{
-		rel: "preconnect",
-		href: "https://fonts.gstatic.com",
-		crossOrigin: "anonymous",
-	},
-	{
-		rel: "stylesheet",
-		href: "https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap",
-	},
+  { rel: "preconnect", href: "https://fonts.googleapis.com" },
+  {
+    rel: "preconnect",
+    href: "https://fonts.gstatic.com",
+    crossOrigin: "anonymous",
+  },
+  {
+    rel: "stylesheet",
+    href: "https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap",
+  },
+  { rel: "icon", href: "/favicon.ico", sizes: "any" },
+  { rel: "apple-touch-icon", href: "/favicon.ico" },
 ];
 
-export function Layout({ children }: { children: React.ReactNode }) {
-	return (
-		<html lang="en">
-			<head>
-				<meta charSet="utf-8" />
-				<meta name="viewport" content="width=device-width, initial-scale=1" />
-				<Meta />
-				<Links />
-			</head>
-			<body>
-				{children}
-				<ScrollRestoration />
-				<Scripts />
-			</body>
-		</html>
-	);
+export function meta() {
+  return [
+    { charSet: "utf-8" },
+    { name: "viewport", content: "width=device-width, initial-scale=1" },
+    { name: "theme-color", content: "#2563eb", media: "(prefers-color-scheme: light)" },
+    { name: "theme-color", content: "#1e3a8a", media: "(prefers-color-scheme: dark)" },
+    { property: "og:site_name", content: "WDS IT" },
+    { property: "og:locale", content: "en_US" },
+    { name: "twitter:card", content: "summary_large_image" },
+  ];
 }
 
-export default function App() {
+export function Layout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en">
+      <head>
+        <meta charSet="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <Meta />
+        <Links />
+      </head>
+      <body>
+        {children}
+        <ScrollRestoration />
+        <Scripts />
+      </body>
+    </html>
+  );
+}export default function App() {
 	return <Outlet />;
 }
 
