@@ -26,14 +26,6 @@ export function Header() {
               width={450}
               height={132}
             />
-            <div className="flex flex-col">
-              <span className="text-xl sm:text-2xl font-bold text-primary-600 dark:text-primary-400">
-                WDS IT
-              </span>
-              <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
-                Shopify Solutions
-              </span>
-            </div>
           </Link>
 
           {/* Desktop Navigation & Theme Toggle */}
