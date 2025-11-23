@@ -18,7 +18,7 @@ export function Navigation({ mobile = false, onLinkClick }: NavigationProps) {
 
   return (
     <nav
-      className={mobile ? "flex flex-col" : "hidden md:flex md:items-center md:gap-8"}
+      className={mobile ? "flex flex-col" : "hidden lg:flex lg:items-center lg:gap-8"}
       data-testid={mobile ? "mobile-nav" : "desktop-nav"}
       aria-label="Main navigation"
     >

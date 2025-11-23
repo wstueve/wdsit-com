@@ -137,7 +137,7 @@ test.describe("Accessibility (WCAG 2.1 AA)", () => {
       await page.goto("/");
       
       if (theme !== "auto") {
-        await page.getByLabel("Theme selection").selectOption(theme);
+        await page.getByLabel("Theme selection").first().selectOption(theme);
       }
       
       const accessibilityScanResults = await new AxeBuilder({ page })

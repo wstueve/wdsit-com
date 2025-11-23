@@ -55,7 +55,7 @@ test.describe("Deployment Smoke Tests", () => {
   test("theme switcher should work", async ({ page }) => {
     await page.goto("/");
 
-    const themeSelect = page.getByLabel("Theme selection");
+    const themeSelect = page.getByLabel("Theme selection").first();
     await expect(themeSelect).toBeVisible();
 
     // Switch to dark theme
@@ -108,11 +108,13 @@ test.describe("Deployment Smoke Tests", () => {
   test("contact information should be correct", async ({ page }) => {
     await page.goto("/contact");
 
+    const mainContent = page.getByTestId("main-content");
+
     // Verify business contact details
-    await expect(page.getByText("913.839.2228")).toBeVisible();
-    await expect(page.getByText("privacy@wds-it.com")).toBeVisible();
-    await expect(page.getByText("legal@wds-it.com")).toBeVisible();
-    await expect(page.getByText("Olathe, Kansas")).toBeVisible();
+    await expect(mainContent.getByText("913.839.2228")).toBeVisible();
+    await expect(mainContent.getByText("privacy@wds-it.com")).toBeVisible();
+    await expect(mainContent.getByText("legal@wds-it.com")).toBeVisible();
+    await expect(mainContent.getByText("Olathe, Kansas")).toBeVisible();
   });
 
   test("meta tags should be present", async ({ page }) => {

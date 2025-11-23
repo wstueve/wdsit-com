@@ -9,14 +9,14 @@ test.describe("Theme Switching", () => {
 
   test("should have theme toggle visible", async ({ page }) => {
     await page.goto("/");
-    await expect(page.getByTestId("theme-toggle")).toBeVisible();
+    await expect(page.getByTestId("desktop-theme-toggle")).toBeVisible();
   });
 
   test("should switch to dark theme", async ({ page }) => {
     await page.goto("/");
 
     // Select dark theme
-    await page.getByLabel("Theme selection").selectOption("dark");
+    await page.getByLabel("Theme selection").first().selectOption("dark");
 
     // Check that dark theme is applied
     const html = page.locator("html");
@@ -31,7 +31,7 @@ test.describe("Theme Switching", () => {
     await page.goto("/");
 
     // Select light theme
-    await page.getByLabel("Theme selection").selectOption("light");
+    await page.getByLabel("Theme selection").first().selectOption("light");
 
     // Check that light theme is applied
     const html = page.locator("html");
@@ -46,7 +46,7 @@ test.describe("Theme Switching", () => {
     await page.goto("/");
 
     // Select high-contrast theme
-    await page.getByLabel("Theme selection").selectOption("high-contrast");
+    await page.getByLabel("Theme selection").first().selectOption("high-contrast");
 
     // Check that high-contrast theme is applied
     const html = page.locator("html");
@@ -61,7 +61,7 @@ test.describe("Theme Switching", () => {
     await page.goto("/");
 
     // Set dark theme
-    await page.getByLabel("Theme selection").selectOption("dark");
+    await page.getByLabel("Theme selection").first().selectOption("dark");
     await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
 
     // Navigate to another page
@@ -75,11 +75,11 @@ test.describe("Theme Switching", () => {
     await page.goto("/");
 
     // Set dark theme first
-    await page.getByLabel("Theme selection").selectOption("dark");
+    await page.getByLabel("Theme selection").first().selectOption("dark");
     await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
 
     // Switch to auto
-    await page.getByLabel("Theme selection").selectOption("auto");
+    await page.getByLabel("Theme selection").first().selectOption("auto");
 
     // data-theme attribute should be removed
     const html = page.locator("html");
@@ -96,17 +96,17 @@ test.describe("Theme Switching", () => {
     await page.goto("/");
 
     // Theme toggle should be visible on mobile
-    await expect(page.getByTestId("theme-toggle")).toBeVisible();
+    await expect(page.getByTestId("mobile-theme-toggle")).toBeVisible();
 
     // Should be able to change theme
-    await page.getByLabel("Theme selection").selectOption("dark");
+    await page.getByLabel("Theme selection").first().selectOption("dark");
     await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   });
 
   test("theme select should have all options", async ({ page }) => {
     await page.goto("/");
 
-    const select = page.getByLabel("Theme selection");
+    const select = page.getByLabel("Theme selection").first();
     
     // Check all options are present
     const options = await select.locator("option").allTextContents();

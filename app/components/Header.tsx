@@ -15,32 +15,32 @@ export function Header() {
             <img
               src="/wds-it_287x84.png"
               alt="WDS IT Logo"
-              className="h-10 w-auto sm:h-12 md:hidden"
+              className="h-10 w-auto sm:h-12 lg:hidden"
               width={287}
               height={84}
             />
             <img
               src="/wds-it_450x132.png"
               alt="WDS IT Logo"
-              className="hidden md:block h-12 w-auto lg:h-14"
+              className="hidden lg:block h-12 w-auto lg:h-14"
               width={450}
               height={132}
             />
           </Link>
 
           {/* Desktop Navigation & Theme Toggle */}
-          <div className="hidden md:flex md:items-center md:gap-6">
+          <div className="hidden lg:flex lg:items-center lg:gap-6">
             <Navigation />
-            <ThemeToggle />
+            <ThemeToggle testId="desktop-theme-toggle" />
           </div>
 
           {/* Mobile Menu Button */}
-          <div className="flex items-center gap-4 md:hidden">
-            <ThemeToggle />
+          <div className="flex items-center gap-4 lg:hidden">
+            <ThemeToggle testId="mobile-theme-toggle" />
             <button
               type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="inline-flex items-center justify-center p-2 rounded-md text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary-600"
+              className="inline-flex items-center justify-center p-3 rounded-md text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary-600"
               aria-expanded={mobileMenuOpen}
               aria-label="Toggle mobile menu"
               data-testid="mobile-menu-button"
@@ -77,7 +77,7 @@ export function Header() {
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden pb-4" data-testid="mobile-menu">
+          <div className="lg:hidden pb-4" data-testid="mobile-menu">
             <Navigation mobile onLinkClick={() => setMobileMenuOpen(false)} />
           </div>
         )}

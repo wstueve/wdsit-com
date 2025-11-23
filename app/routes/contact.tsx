@@ -13,6 +13,7 @@ export function meta({}: Route.MetaArgs) {
 
 export default function Contact() {
   const [formStatus, setFormStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
+  const [formKey, setFormKey] = useState(0);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -32,7 +33,10 @@ export default function Contact() {
       await new Promise(resolve => setTimeout(resolve, 1000));
       console.log("Form submission:", data);
       setFormStatus("success");
-      e.currentTarget.reset();
+      // Reset form by incrementing key to force remount
+      setFormKey(prev => prev + 1);
+      // Reset status after showing success message
+      setTimeout(() => setFormStatus("idle"), 5000);
     } catch (error) {
       console.error("Form submission error:", error);
       setFormStatus("error");
@@ -52,7 +56,7 @@ export default function Contact() {
       </section>
 
       {/* Contact Content */}
-      <section className="py-16 sm:py-20 bg-white dark:bg-gray-950">
+      <section className="py-16 sm:py-20 bg-white dark:bg-gray-950" data-testid="main-content">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             {/* Contact Information */}
@@ -139,7 +143,13 @@ export default function Contact() {
                 Send Us a Message
               </h2>
 
-              <form onSubmit={handleSubmit} className="space-y-6">
+              {formStatus === "success" && (
+                <div className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg text-green-800 dark:text-green-200 text-sm mb-6">
+                  Thank you for your message! We'll get back to you soon.
+                </div>
+              )}
+
+              <form key={formKey} onSubmit={handleSubmit} className="space-y-6">
                 <div>
                   <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Name *
@@ -199,16 +209,10 @@ export default function Contact() {
                 <button
                   type="submit"
                   disabled={formStatus === "submitting"}
-                  className="w-full px-6 py-4 bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full px-6 py-4 bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[48px]"
                 >
                   {formStatus === "submitting" ? "Sending..." : "Send Message"}
                 </button>
-
-                {formStatus === "success" && (
-                  <div className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg text-green-800 dark:text-green-200 text-sm">
-                    Thank you for your message! We'll get back to you soon.
-                  </div>
-                )}
 
                 {formStatus === "error" && (
                   <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-800 dark:text-red-200 text-sm">

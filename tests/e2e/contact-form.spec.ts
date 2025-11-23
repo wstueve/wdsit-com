@@ -112,31 +112,35 @@ test.describe("Contact Form", () => {
   test("contact information should be displayed", async ({ page }) => {
     await page.goto("/contact");
 
+    const mainContent = page.getByTestId("main-content");
+
     // Phone number
-    await expect(page.getByRole("link", { name: "913.839.2228" })).toBeVisible();
+    await expect(mainContent.getByRole("link", { name: "913.839.2228" })).toBeVisible();
 
     // Email addresses
-    await expect(page.getByRole("link", { name: "privacy@wds-it.com" })).toBeVisible();
-    await expect(page.getByRole("link", { name: "legal@wds-it.com" })).toBeVisible();
+    await expect(mainContent.getByRole("link", { name: "privacy@wds-it.com" })).toBeVisible();
+    await expect(mainContent.getByRole("link", { name: "legal@wds-it.com" })).toBeVisible();
 
     // Location
-    await expect(page.getByText("Olathe, Kansas")).toBeVisible();
+    await expect(mainContent.getByText("Olathe, Kansas")).toBeVisible();
 
     // Business hours
-    await expect(page.getByText(/monday - friday/i)).toBeVisible();
+    await expect(mainContent.getByText(/monday - friday/i)).toBeVisible();
   });
 
   test("email links should work", async ({ page }) => {
     await page.goto("/contact");
 
-    const emailLink = page.getByRole("link", { name: "privacy@wds-it.com" });
+    const mainContent = page.getByTestId("main-content");
+    const emailLink = mainContent.getByRole("link", { name: "privacy@wds-it.com" });
     await expect(emailLink).toHaveAttribute("href", "mailto:privacy@wds-it.com");
   });
 
   test("phone link should work", async ({ page }) => {
     await page.goto("/contact");
 
-    const phoneLink = page.getByRole("link", { name: "913.839.2228" });
+    const mainContent = page.getByTestId("main-content");
+    const phoneLink = mainContent.getByRole("link", { name: "913.839.2228" });
     await expect(phoneLink).toHaveAttribute("href", "tel:+19138392228");
   });
 });
