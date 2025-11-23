@@ -101,6 +101,13 @@ resource "google_cloud_run_v2_service" "wdsit_app" {
       # Allow gcloud CLI to update the service without Terraform interference
       template[0].containers[0].image,
       template[0].revision,
+      # Allow canary deployment script to manage traffic splits
+      traffic,
+      # Ignore gcloud-specific metadata
+      client,
+      client_version,
+      build_config,
+      scaling,
     ]
   }
 }
