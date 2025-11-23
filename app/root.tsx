@@ -45,6 +45,23 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <Meta />
         <Links />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                const stored = localStorage.getItem('theme');
+                const root = document.documentElement;
+                
+                if (stored && stored !== 'auto') {
+                  root.setAttribute('data-theme', stored);
+                } else {
+                  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                  root.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
+                }
+              })();
+            `,
+          }}
+        />
       </head>
       <body>
         {children}
