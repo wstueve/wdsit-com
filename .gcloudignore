@@ -1,0 +1,48 @@
+# This file specifies files that are *not* uploaded to Google Cloud
+# using gcloud. It follows the same syntax as .gitignore.
+
+# Include .gitignore patterns
+#!include:.gitignore
+
+# Development and test files
+.env
+.env.*
+!.env.example
+test-results/
+playwright-report/
+coverage/
+
+# Testing
+tests/
+
+# Documentation
+*.md
+!README.md
+
+# Git
+.git/
+.gitattributes
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+
+# CI/CD
+.github/
+
+# Terraform
+terraform/
+
+# DevOps
+.devops/
+
+# Docker (not needed for source deployment)
+Dockerfile
+.dockerignore
+
+# Cloudflare legacy
+wrangler.json
+wrangler.toml
+worker-configuration.d.ts
+workers/

@@ -28,7 +28,7 @@ export default function Contact() {
     };
 
     try {
-      // TODO: Implement form submission via Cloudflare Workers
+      // TODO: Implement form submission via Cloud Run API endpoint
       // For now, we'll simulate the submission
       await new Promise(resolve => setTimeout(resolve, 1000));
       console.log("Form submission:", data);

@@ -191,12 +191,16 @@ dist
 
 # End of https://www.toptal.com/developers/gitignore/api/macos,node,git
 
-### Wrangler ###
+### Wrangler (legacy) ###
 .wrangler/
-.env*
-!.env.example
 .dev.vars*
 !.dev.vars.example
+
+### Environment ###
+.env
+.env.*
+!.env.example
+.env.backup
 
 ### React Router ###
 .react-router/
@@ -207,3 +211,12 @@ dist
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+
+### Terraform ###
+terraform/.terraform/
+terraform/*.tfstate
+terraform/*.tfstate.*
+terraform/.terraform.lock.hcl
+terraform/terraform.tfvars
+
+

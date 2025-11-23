@@ -37,17 +37,17 @@ jobs:
           retention-days: 30
   
   deployment-test:
+    name: Deployment Smoke Tests
     timeout-minutes: 10
     runs-on: ubuntu-latest
-    # Run only after main deployment (configure based on your deployment setup)
-    if: github.ref == 'refs/heads/main'
-    needs: test
+    # Run on pull requests to verify test setup
+    # Actual production smoke tests run in deploy.yml workflow
     steps:
       - uses: actions/checkout@v4
       
       - uses: actions/setup-node@v4
         with:
-          node-version: lts/*
+          node-version: 20
           cache: 'npm'
       
       - name: Install dependencies
@@ -57,10 +57,10 @@ jobs:
         run: npx playwright install --with-deps chromium
       
       - name: Run deployment smoke tests
-        run: npm run test:deployment
+        run: npm run test:deployment -- --reporter=list
         env:
           CI: true
-          PLAYWRIGHT_TEST_BASE_URL: https://wdsit.com
+          # Tests will use default base URL from playwright.config.ts
       
       - uses: actions/upload-artifact@v4
         if: always()

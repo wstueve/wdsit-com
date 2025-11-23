@@ -1,6 +1,6 @@
 # WDS IT - Shopify Solutions
 
-Enterprise Shopify plugin development with AI integration and Azure certification. A modern, responsive website built with React Router 7 and hosted on Cloudflare Workers.
+Enterprise Shopify plugin development with AI integration and Azure certification. A modern, responsive website built with React Router 7 and deployed on Google Cloud Run with global CDN.
 
 ## 🚀 Features
 
@@ -8,7 +8,7 @@ Enterprise Shopify plugin development with AI integration and Azure certificatio
 - **Responsive Design**: Mobile-first approach with optimized layouts for phones, tablets, and desktops
 - **Theme Support**: Light, dark, and high-contrast themes with system preference detection and manual override
 - **Accessibility**: WCAG 2.1 AA compliant with comprehensive keyboard navigation and screen reader support
-- **Performance**: Server-side rendering (SSR) with Cloudflare Workers for fast global delivery
+- **Performance**: Server-side rendering (SSR) with Cloud Run and Cloud CDN for fast global delivery
 - **Testing**: Comprehensive Playwright test suite covering E2E, accessibility, and deployment validation
 - **SEO Optimized**: Proper meta tags, Open Graph support, and semantic HTML
 
@@ -77,22 +77,25 @@ npm run preview
 
 ## 🚢 Deployment
 
-### Cloudflare Workers/Pages
+### Google Cloud Run
 
-Deploy to Cloudflare:
+Deploy to Cloud Run from source (no Docker required):
 
 ```sh
 npm run deploy
 ```
 
-The site will be deployed to Cloudflare Workers with global edge distribution.
+Cloud Run will automatically containerize your application using Cloud Buildpacks and deploy it with global Cloud CDN distribution.
+
+For detailed migration and setup instructions, see [MIGRATION_GUIDE.md](MIGRATION_GUIDE.md).
 
 ### CI/CD
 
-GitHub Actions workflow is configured in `.github/workflows/playwright.yml` to:
-- Run full test suite on pull requests and main branch pushes
-- Execute deployment smoke tests after production deployments
-- Generate and store test reports as artifacts
+GitHub Actions workflows:
+- `.github/workflows/playwright.yml` - Run tests on PRs and main branch
+- `.github/workflows/deploy.yml` - Deploy from source to Cloud Run with gradual traffic migration
+- Automated smoke tests after production deployments
+- Test reports stored as artifacts
 
 ## 📁 Project Structure
 
@@ -123,7 +126,15 @@ GitHub Actions workflow is configured in `.github/workflows/playwright.yml` to:
 │   ├── accessibility/    # WCAG compliance tests
 │   ├── e2e/             # End-to-end tests
 │   └── deployment/      # Production smoke tests
-├── workers/             # Cloudflare Workers configuration
+├── terraform/           # Infrastructure as Code
+│   ├── main.tf          # Terraform configuration
+│   ├── cloud-run.tf     # Cloud Run service
+│   ├── load-balancer.tf # Load Balancer & CDN
+│   ├── secrets.tf       # Secret Manager configuration
+│   ├── terraform.tfvars # Variables (secrets included)
+│   └── ...              # Other infrastructure
+├── .github/workflows/   # CI/CD workflows
+├── server.js            # Express server entry point
 └── playwright.config.ts # Playwright test configuration
 ```
 

@@ -5,7 +5,7 @@
 ## Project Context
 This is a React Router website for a Shopify plugin business, converted from legacy ASP.NET consulting site content. The site showcases technical expertise and credibility for Shopify marketplace requirements. We have also been using AI tools and are certified in Azure AI. The goal is to create a fast, responsive, and SEO-optimized site that highlights our experience with enterprise-scale applications and databases.  We want to ensure the site meets Shopify's marketplace requirements while maintaining a professional and technical tone.
 
-It is built with TypeScript and React Router, focusing on static generation where possible for optimal performance. The design should be clean, modern, and responsive, catering to both Shopify merchants and developers.  It is hosted on Cloudflare Workers and Pages for fast global delivery.
+It is built with TypeScript and React Router, focusing on static generation where possible for optimal performance. The design should be clean, modern, and responsive, catering to both Shopify merchants and developers.  It is hosted on Google Cloud Run with global load balancing and CDN for fast worldwide delivery.
 
 ## Technical Requirements
 - Use React Router with TypeScript
@@ -18,7 +18,7 @@ It is built with TypeScript and React Router, focusing on static generation wher
 - Utilize many components for modularity and reusability
 - Follow SOLID principles and clean architecture
 - Ensure accessibility compliance (WCAG 2.1)
-- Host on Cloudflare Workers and Pages
+- Host on Google Cloud Run with Cloud CDN
 - Secure the application against vulnerabilities
 - Implement proper error handling and user feedback mechanisms
 - Create playwright tests which fail and then fix them
