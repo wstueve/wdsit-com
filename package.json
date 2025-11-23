@@ -29,7 +29,7 @@
 		"build": "react-router build",
 		"check": "tsc && react-router build",
 		"deploy": "gcloud run deploy svc-wdsit-com --source . --region=us-central1",
-		"deploy:canary": "./scripts/canary-deploy.sh",
+		"deploy:canary": "./.scripts/canary-deploy.sh",
 		"dev": "react-router dev",
 		"preview": "npm run build && node server.js",
 		"start": "node server.js",
@@ -38,6 +38,10 @@
 		"test:ui": "playwright test --ui",
 		"test:deployment": "playwright test tests/deployment",
 		"typecheck": "tsc -b"
+	},
+	"engines": {
+		"node": ">=20.0.0",
+		"npm": ">=10.0.0"
 	},
 	"type": "module"
 }

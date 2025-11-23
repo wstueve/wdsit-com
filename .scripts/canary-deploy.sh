@@ -2,7 +2,7 @@
 
 # Canary Deployment Script for Cloud Run
 # Tests new revision before gradually migrating traffic
-# Usage: ./scripts/canary-deploy.sh
+# Usage: ./scripts/canary-deploy.sh [--skip-tests]
 
 set -e
 
@@ -17,6 +17,22 @@ NC='\033[0m' # No Color
 PROJECT_ID="wdsit-com"
 REGION="us-central1"
 SERVICE_NAME="svc-wdsit-com"
+SKIP_TESTS=false
+
+# Parse arguments
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    --skip-tests)
+      SKIP_TESTS=true
+      shift
+      ;;
+    *)
+      echo "Unknown option: $1"
+      echo "Usage: $0 [--skip-tests]"
+      exit 1
+      ;;
+  esac
+done
 
 echo -e "${BLUE}═══════════════════════════════════════════════${NC}"
 echo -e "${BLUE}  Canary Deployment to Cloud Run${NC}"
@@ -24,13 +40,18 @@ echo -e "${BLUE}═════════════════════�
 echo ""
 
 # Step 1: Run local tests first
-echo -e "${YELLOW}[1/7]${NC} Running Playwright tests locally..."
-npm run test -- --reporter=list || {
-  echo -e "${RED}✗ Tests failed locally. Fix issues before deploying.${NC}"
-  exit 1
-}
-echo -e "${GREEN}✓ Local tests passed${NC}"
-echo ""
+if [ "$SKIP_TESTS" = false ]; then
+  echo -e "${YELLOW}[1/7]${NC} Running Playwright tests locally..."
+  npm run test -- --reporter=list || {
+    echo -e "${RED}✗ Tests failed locally. Fix issues before deploying.${NC}"
+    exit 1
+  }
+  echo -e "${GREEN}✓ Local tests passed${NC}"
+  echo ""
+else
+  echo -e "${YELLOW}[1/7]${NC} Skipping tests (--skip-tests flag provided)"
+  echo ""
+fi
 
 # Step 2: Build the application
 echo -e "${YELLOW}[2/7]${NC} Building application..."
@@ -78,15 +99,20 @@ echo -e "${GREEN}✓ Revision ready${NC}"
 echo ""
 
 # Step 5: Run smoke tests against the new revision (0% traffic)
-echo -e "${YELLOW}[5/7]${NC} Running smoke tests against new revision..."
-PLAYWRIGHT_TEST_BASE_URL=$PREVIEW_URL npm run test:deployment -- --reporter=list || {
-  echo -e "${RED}✗ Smoke tests failed on new revision${NC}"
-  echo -e "${RED}Deployment stopped. New revision has 0% traffic.${NC}"
-  echo -e "${YELLOW}To rollback: Delete the revision or leave it with 0% traffic${NC}"
-  exit 1
-}
-echo -e "${GREEN}✓ Smoke tests passed on new revision${NC}"
-echo ""
+if [ "$SKIP_TESTS" = false ]; then
+  echo -e "${YELLOW}[5/7]${NC} Running smoke tests against new revision..."
+  PLAYWRIGHT_TEST_BASE_URL=$PREVIEW_URL npm run test:deployment -- --reporter=list || {
+    echo -e "${RED}✗ Smoke tests failed on new revision${NC}"
+    echo -e "${RED}Deployment stopped. New revision has 0% traffic.${NC}"
+    echo -e "${YELLOW}To rollback: Delete the revision or leave it with 0% traffic${NC}"
+    exit 1
+  }
+  echo -e "${GREEN}✓ Smoke tests passed on new revision${NC}"
+  echo ""
+else
+  echo -e "${YELLOW}[5/7]${NC} Skipping smoke tests (--skip-tests flag provided)"
+  echo ""
+fi
 
 # Step 6: Gradual traffic migration
 echo -e "${YELLOW}[6/7]${NC} Starting gradual traffic migration..."
@@ -127,15 +153,19 @@ echo -e "${GREEN}✓ 100% traffic migrated${NC}"
 echo ""
 
 # Step 7: Final verification
-echo -e "${YELLOW}[7/7]${NC} Running final smoke tests on production..."
-PLAYWRIGHT_TEST_BASE_URL=https://wdsit.com npm run test:deployment -- --reporter=list || {
-  echo -e "${RED}✗ Final smoke tests failed${NC}"
-  echo -e "${YELLOW}Consider rolling back!${NC}"
-  exit 1
-}
-
-echo -e "${GREEN}✓ Final smoke tests passed${NC}"
-echo ""
+if [ "$SKIP_TESTS" = false ]; then
+  echo -e "${YELLOW}[7/7]${NC} Running final smoke tests on production..."
+  PLAYWRIGHT_TEST_BASE_URL=https://wdsit.com npm run test:deployment -- --reporter=list || {
+    echo -e "${RED}✗ Final smoke tests failed${NC}"
+    echo -e "${YELLOW}Consider rolling back!${NC}"
+    exit 1
+  }
+  echo -e "${GREEN}✓ Final smoke tests passed${NC}"
+  echo ""
+else
+  echo -e "${YELLOW}[7/7]${NC} Skipping final smoke tests (--skip-tests flag provided)"
+  echo ""
+fi
 
 # Success summary
 echo -e "${GREEN}═══════════════════════════════════════════════${NC}"
