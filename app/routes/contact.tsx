@@ -46,7 +46,7 @@ export default function Contact() {
   return (
     <Layout>
       {/* Hero Section */}
-      <section className="bg-linear-to-br from-gray-50 via-white to-primary-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 py-16 sm:py-20">
+      <section className="bg-gradient-to-br from-primary-50 via-gray-50 to-primary-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 py-16 sm:py-20">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <h1 className="text-center mb-6">Contact Us</h1>
           <p className="text-xl text-gray-600 dark:text-gray-300 text-center max-w-2xl mx-auto">
@@ -56,7 +56,7 @@ export default function Contact() {
       </section>
 
       {/* Contact Content */}
-      <section className="py-16 sm:py-20 bg-white dark:bg-gray-950" data-testid="main-content">
+      <section className="py-16 sm:py-20 bg-gray-50 dark:bg-gray-950" data-testid="main-content">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             {/* Contact Information */}
@@ -138,7 +138,7 @@ export default function Contact() {
             </div>
 
             {/* Contact Form */}
-            <div className="bg-gray-50 dark:bg-gray-900 rounded-xl p-8 border border-gray-200 dark:border-gray-800">
+            <div className="bg-white/80 dark:bg-gray-900 rounded-xl p-8 border border-gray-200 dark:border-gray-800">
               <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">
                 Send Us a Message
               </h2>

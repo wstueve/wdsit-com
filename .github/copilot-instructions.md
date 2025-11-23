@@ -21,6 +21,9 @@ It is built with TypeScript and React Router, focusing on static generation wher
 - Host on Cloudflare Workers and Pages
 - Secure the application against vulnerabilities
 - Implement proper error handling and user feedback mechanisms
+- Create playwright tests which fail and then fix them
+- Only run single tests to verify functionality and then run entire suite once all single tests are passing
+- When running playwright tests, ensure to use the reporter list flag to keep the browser from opening as to not block the terminal
 
 ## Content Guidelines
 - Adapt consulting services content to demonstrate plugin development expertise especially with AI

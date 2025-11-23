@@ -16,14 +16,29 @@ export function ThemeToggle({ testId = "theme-toggle" }: ThemeToggleProps) {
     if (stored) {
       setTheme(stored);
       applyTheme(stored);
+    } else {
+      // If no stored theme, apply auto which respects system preference
+      applyTheme("auto");
     }
-  }, []);
+
+    // Listen for system theme changes when in auto mode
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    const handleChange = () => {
+      if (theme === "auto") {
+        applyTheme("auto");
+      }
+    };
+    mediaQuery.addEventListener("change", handleChange);
+    return () => mediaQuery.removeEventListener("change", handleChange);
+  }, [theme]);
 
   function applyTheme(newTheme: Theme) {
     const root = document.documentElement;
     
     if (newTheme === "auto") {
-      root.removeAttribute("data-theme");
+      // Set theme based on system preference
+      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      root.setAttribute("data-theme", prefersDark ? "dark" : "light");
       localStorage.removeItem("theme");
     } else {
       root.setAttribute("data-theme", newTheme);
