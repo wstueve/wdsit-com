@@ -31,8 +31,11 @@ test.describe("Deployment Smoke Tests", () => {
   test("static assets should load", async ({ page }) => {
     await page.goto("/");
 
-    // Logo images should load
-    const logo = page.locator('img[alt="WDS IT Logo"]').first();
+    // Logo images should load - select the visible one based on viewport
+    const viewport = page.viewportSize();
+    const isMobile = viewport && viewport.width < 1024;
+    const logoSelector = isMobile ? 'img[alt="WDS IT Logo"].lg\\:hidden' : 'img[alt="WDS IT Logo"]:not(.lg\\:hidden)';
+    const logo = page.locator(logoSelector);
     await expect(logo).toBeVisible();
 
     // Favicon should be present
@@ -43,19 +46,35 @@ test.describe("Deployment Smoke Tests", () => {
   test("navigation should work", async ({ page }) => {
     await page.goto("/");
 
+    // Open mobile menu if on mobile viewport
+    const viewport = page.viewportSize();
+    const isMobile = viewport && viewport.width < 1024;
+    if (isMobile) {
+      await page.getByTestId("mobile-menu-button").click();
+    }
+
     // Click About link
     await page.getByRole("link", { name: "About" }).click();
     await expect(page).toHaveURL(/\/about/);
 
-    // Click Home link
-    await page.getByRole("link", { name: "Home" }).click();
+    // Re-open mobile menu if needed (page navigated, menu closed automatically)
+    if (isMobile) {
+      await page.getByTestId("mobile-menu-button").click();
+    }
+
+    // Click Home link - use exact match to avoid logo link
+    await page.getByRole("link", { name: "Home", exact: true }).click();
     await expect(page).toHaveURL(/\/$/);
   });
 
   test("theme switcher should work", async ({ page }) => {
     await page.goto("/");
 
-    const themeSelect = page.getByLabel("Theme selection").first();
+    // Use viewport-aware selector
+    const viewport = page.viewportSize();
+    const isMobile = viewport && viewport.width < 1024;
+    const testId = isMobile ? "mobile-theme-toggle" : "desktop-theme-toggle";
+    const themeSelect = page.getByTestId(testId).getByLabel("Theme selection");
     await expect(themeSelect).toBeVisible();
 
     // Switch to dark theme

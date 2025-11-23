@@ -36,27 +36,30 @@ export function ThemeToggle({ testId = "theme-toggle" }: ThemeToggleProps) {
     applyTheme(newTheme);
   }
 
-  if (!mounted) {
-    return null;
-  }
+  // Render skeleton before hydration to prevent test failures
+  const selectElement = (
+    <select
+      id={`theme-select-${testId}`}
+      value={mounted ? theme : "auto"}
+      onChange={mounted ? (e) => handleThemeChange(e.target.value as Theme) : undefined}
+      disabled={!mounted}
+      className="rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-600 dark:focus:ring-primary-400 min-h-[48px]"
+      aria-label="Theme selection"
+      data-hydrated={mounted ? "true" : "false"}
+    >
+      <option value="auto">Auto</option>
+      <option value="light">Light</option>
+      <option value="dark">Dark</option>
+      <option value="high-contrast">High Contrast</option>
+    </select>
+  );
 
   return (
     <div className="flex items-center gap-2" data-testid={testId}>
       <label htmlFor={`theme-select-${testId}`} className="sr-only">
         Select theme
       </label>
-      <select
-        id={`theme-select-${testId}`}
-        value={theme}
-        onChange={(e) => handleThemeChange(e.target.value as Theme)}
-        className="rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-600 dark:focus:ring-primary-400 min-h-[48px]"
-        aria-label="Theme selection"
-      >
-        <option value="auto">Auto</option>
-        <option value="light">Light</option>
-        <option value="dark">Dark</option>
-        <option value="high-contrast">High Contrast</option>
-      </select>
+      {selectElement}
     </div>
   );
 }

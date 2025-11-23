@@ -11,7 +11,7 @@ export function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center py-4 md:py-6">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-3" data-testid="logo-link">
+          <Link to="/" className="flex items-center gap-3" data-testid="logo-link" aria-label="WDS IT Home">
             <img
               src="/wds-it_287x84.png"
               alt="WDS IT Logo"

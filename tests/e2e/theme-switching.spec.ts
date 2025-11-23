@@ -9,14 +9,20 @@ test.describe("Theme Switching", () => {
 
   test("should have theme toggle visible", async ({ page }) => {
     await page.goto("/");
-    await expect(page.getByTestId("desktop-theme-toggle")).toBeVisible();
+    const viewport = page.viewportSize();
+    const isMobile = viewport && viewport.width < 1024;
+    const testId = isMobile ? "mobile-theme-toggle" : "desktop-theme-toggle";
+    await expect(page.getByTestId(testId)).toBeVisible();
   });
 
   test("should switch to dark theme", async ({ page }) => {
     await page.goto("/");
 
-    // Select dark theme
-    await page.getByLabel("Theme selection").first().selectOption("dark");
+    // Select dark theme - use viewport-aware selector
+    const viewport = page.viewportSize();
+    const isMobile = viewport && viewport.width < 1024;
+    const testId = isMobile ? "mobile-theme-toggle" : "desktop-theme-toggle";
+    await page.getByTestId(testId).getByLabel("Theme selection").selectOption("dark");
 
     // Check that dark theme is applied
     const html = page.locator("html");
@@ -30,8 +36,11 @@ test.describe("Theme Switching", () => {
   test("should switch to light theme", async ({ page }) => {
     await page.goto("/");
 
-    // Select light theme
-    await page.getByLabel("Theme selection").first().selectOption("light");
+    // Select light theme - use viewport-aware selector
+    const viewport = page.viewportSize();
+    const isMobile = viewport && viewport.width < 1024;
+    const testId = isMobile ? "mobile-theme-toggle" : "desktop-theme-toggle";
+    await page.getByTestId(testId).getByLabel("Theme selection").selectOption("light");
 
     // Check that light theme is applied
     const html = page.locator("html");
@@ -45,8 +54,11 @@ test.describe("Theme Switching", () => {
   test("should switch to high-contrast theme", async ({ page }) => {
     await page.goto("/");
 
-    // Select high-contrast theme
-    await page.getByLabel("Theme selection").first().selectOption("high-contrast");
+    // Select high-contrast theme - use viewport-aware selector
+    const viewport = page.viewportSize();
+    const isMobile = viewport && viewport.width < 1024;
+    const testId = isMobile ? "mobile-theme-toggle" : "desktop-theme-toggle";
+    await page.getByTestId(testId).getByLabel("Theme selection").selectOption("high-contrast");
 
     // Check that high-contrast theme is applied
     const html = page.locator("html");
@@ -60,8 +72,11 @@ test.describe("Theme Switching", () => {
   test("should persist theme across page navigation", async ({ page }) => {
     await page.goto("/");
 
-    // Set dark theme
-    await page.getByLabel("Theme selection").first().selectOption("dark");
+    // Set dark theme - use viewport-aware selector
+    const viewport = page.viewportSize();
+    const isMobile = viewport && viewport.width < 1024;
+    const testId = isMobile ? "mobile-theme-toggle" : "desktop-theme-toggle";
+    await page.getByTestId(testId).getByLabel("Theme selection").selectOption("dark");
     await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
 
     // Navigate to another page
@@ -74,12 +89,16 @@ test.describe("Theme Switching", () => {
   test("should reset to system preference with auto", async ({ page }) => {
     await page.goto("/");
 
-    // Set dark theme first
-    await page.getByLabel("Theme selection").first().selectOption("dark");
+    // Set dark theme first - use viewport-aware selector
+    const viewport = page.viewportSize();
+    const isMobile = viewport && viewport.width < 1024;
+    const testId = isMobile ? "mobile-theme-toggle" : "desktop-theme-toggle";
+    const themeToggle = page.getByTestId(testId).getByLabel("Theme selection");
+    await themeToggle.selectOption("dark");
     await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
 
     // Switch to auto
-    await page.getByLabel("Theme selection").first().selectOption("auto");
+    await themeToggle.selectOption("auto");
 
     // data-theme attribute should be removed
     const html = page.locator("html");
@@ -98,8 +117,9 @@ test.describe("Theme Switching", () => {
     // Theme toggle should be visible on mobile
     await expect(page.getByTestId("mobile-theme-toggle")).toBeVisible();
 
-    // Should be able to change theme
-    await page.getByLabel("Theme selection").first().selectOption("dark");
+    // Should be able to change theme - specifically target the mobile theme toggle
+    const mobileThemeToggle = page.getByTestId("mobile-theme-toggle").getByLabel("Theme selection");
+    await mobileThemeToggle.selectOption("dark");
     await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   });
 

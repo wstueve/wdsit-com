@@ -8,18 +8,25 @@ test.describe("Navigation", () => {
     await expect(page).toHaveTitle(/WDS IT/);
     await expect(page.getByRole("heading", { name: /Enterprise Shopify Solutions/i })).toBeVisible();
 
+    // Check if mobile viewport
+    const viewport = page.viewportSize();
+    const isMobile = viewport && viewport.width < 1024;
+
     // Navigate to About
+    if (isMobile) await page.getByTestId("mobile-menu-button").click();
     await page.getByRole("link", { name: "About" }).click();
     await expect(page).toHaveURL("/about");
     await expect(page.getByRole("heading", { name: /About WDS IT/i })).toBeVisible();
 
     // Navigate to Contact
+    if (isMobile) await page.getByTestId("mobile-menu-button").click();
     await page.getByRole("link", { name: "Contact" }).click();
     await expect(page).toHaveURL("/contact");
     await expect(page.getByRole("heading", { name: /Contact Us/i })).toBeVisible();
 
     // Navigate back to Home
-    await page.getByRole("link", { name: "Home" }).click();
+    if (isMobile) await page.getByTestId("mobile-menu-button").click();
+    await page.getByRole("link", { name: "Home", exact: true }).click();
     await expect(page).toHaveURL("/");
   });
 

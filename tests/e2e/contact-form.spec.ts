@@ -71,8 +71,12 @@ test.describe("Contact Form", () => {
     const submitButton = page.getByRole("button", { name: /send message/i });
     await submitButton.click();
 
-    // Button should be disabled immediately
-    await expect(submitButton).toBeDisabled();
+    // The button should show "Sending..." text while submitting (which also means it's disabled)
+    await expect(page.getByRole("button", { name: /sending/i })).toBeVisible({ timeout: 2000 });
+    
+    // Verify it's actually disabled while showing "Sending..."
+    const sendingButton = page.getByRole("button", { name: /sending/i });
+    await expect(sendingButton).toBeDisabled();
   });
 
   test("should clear form after successful submission", async ({ page }) => {
