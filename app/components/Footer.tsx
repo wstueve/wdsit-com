@@ -14,10 +14,10 @@ export function Footer() {
               WDS IT, LLC
             </h3>
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-              Enterprise Shopify Solutions
+              Enterprise Shopify Solutions & AI Consulting
             </p>
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              Olathe, Kansas
+              Proudly based in Olathe, Kansas
             </p>
           </div>
 
@@ -69,9 +69,6 @@ export function Footer() {
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
             <p className="text-sm text-gray-600 dark:text-gray-400">
               © {currentYear} WDS IT, LLC. All rights reserved.
-            </p>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              Built with React Router & Cloudflare Workers
             </p>
           </div>
         </div>
