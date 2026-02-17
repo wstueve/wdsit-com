@@ -10,7 +10,7 @@ domain       = "wdsit.com"
 environment  = "production"
 
 # Scaling configuration
-min_instances = 2
+min_instances = 0
 max_instances = 10
 
 # Resource configuration
