@@ -1,5 +1,68 @@
 # Load Balancer and Cloud CDN configuration
 
+# Cloud Armor security policy (WAF)
+resource "google_compute_security_policy" "wdsit_security" {
+  name        = "${var.service_name}-security-policy"
+  description = "Cloud Armor security policy for ${var.service_name}"
+
+  # Default rule: allow all traffic
+  rule {
+    action   = "allow"
+    priority = "2147483647"
+    match {
+      versioned_expr = "SRC_IPS_V1"
+      config {
+        src_ip_ranges = ["*"]
+      }
+    }
+    description = "Default allow rule"
+  }
+
+  # Rate limiting rule
+  rule {
+    action   = "throttle"
+    priority = "1000"
+    match {
+      versioned_expr = "SRC_IPS_V1"
+      config {
+        src_ip_ranges = ["*"]
+      }
+    }
+    rate_limit_options {
+      conform_action = "allow"
+      exceed_action  = "deny(429)"
+      rate_limit_threshold {
+        count        = 100
+        interval_sec = 60
+      }
+    }
+    description = "Rate limiting: 100 requests per minute per IP"
+  }
+
+  # Block common attack patterns (XSS, SQLi)
+  rule {
+    action   = "deny(403)"
+    priority = "900"
+    match {
+      expr {
+        expression = "evaluatePreconfiguredExpr('xss-v33-stable')"
+      }
+    }
+    description = "Block XSS attacks"
+  }
+
+  rule {
+    action   = "deny(403)"
+    priority = "901"
+    match {
+      expr {
+        expression = "evaluatePreconfiguredExpr('sqli-v33-stable')"
+      }
+    }
+    description = "Block SQL injection attacks"
+  }
+}
+
 # Reserve a static external IP address
 resource "google_compute_global_address" "wdsit_ip" {
   name = "${var.service_name}-ip"
@@ -22,6 +85,7 @@ resource "google_compute_backend_service" "wdsit_backend" {
   protocol                = "HTTP"
   port_name               = "http"
   load_balancing_scheme   = "EXTERNAL_MANAGED"
+  security_policy         = google_compute_security_policy.wdsit_security.self_link
   # Note: timeout_sec is not supported for serverless NEGs
 
   # Enable Cloud CDN

@@ -3,6 +3,8 @@ import { createRequestHandler } from "@react-router/express";
 import { Resend } from "resend";
 import * as path from "path";
 import { fileURLToPath } from "url";
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -15,28 +17,113 @@ const resend = process.env.RESEND_API_KEY
 	? new Resend(process.env.RESEND_API_KEY)
 	: null;
 
-// Middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-// Trust proxy for Cloud Run
+// Trust proxy for Cloud Run (must be set before rate limiter)
 app.set("trust proxy", true);
+
+// Security headers via helmet
+app.use(
+	helmet({
+		contentSecurityPolicy: {
+			directives: {
+				defaultSrc: ["'self'"],
+				scriptSrc: ["'self'", "'unsafe-inline'"],
+				styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+				imgSrc: ["'self'", "data:", "https:"],
+				fontSrc: ["'self'", "https://fonts.gstatic.com"],
+				connectSrc: ["'self'"],
+				frameAncestors: ["'none'"],
+				baseUri: ["'self'"],
+				formAction: ["'self'"],
+				upgradeInsecureRequests: [],
+			},
+		},
+		referrerPolicy: { policy: "strict-origin-when-cross-origin" },
+		hsts: {
+			maxAge: 63072000, // 2 years
+			includeSubDomains: true,
+			preload: true,
+		},
+		permissionsPolicy: {
+			features: {
+				camera: ["'none'"],
+				microphone: ["'none'"],
+				geolocation: ["'none'"],
+				payment: ["'none'"],
+			},
+		},
+	}),
+);
+
+// Middleware with body size limits to prevent DoS
+app.use(express.json({ limit: "10kb" }));
+app.use(express.urlencoded({ extended: true, limit: "10kb" }));
+
+// Rate limiting for API endpoints
+const apiLimiter = rateLimit({
+	windowMs: 15 * 60 * 1000, // 15 minutes
+	max: 10, // limit each IP to 10 requests per window
+	standardHeaders: true,
+	legacyHeaders: false,
+	message: { error: "Too many requests, please try again later." },
+});
+
+// General rate limiting
+const generalLimiter = rateLimit({
+	windowMs: 15 * 60 * 1000,
+	max: 200,
+	standardHeaders: true,
+	legacyHeaders: false,
+});
+app.use(generalLimiter);
 
 // Health check endpoint for Cloud Run
 app.get("/health", (req, res) => {
 	res.status(200).json({ status: "healthy" });
 });
 
-// Contact form API endpoint
-app.post("/api/contact", async (req, res) => {
+/**
+ * Escape HTML entities to prevent XSS in email content.
+ * @param {string} str - Raw user input string.
+ * @returns {string} Escaped string safe for HTML embedding.
+ */
+function escapeHtml(str) {
+	return str
+		.replace(/&/g, "&amp;")
+		.replace(/</g, "&lt;")
+		.replace(/>/g, "&gt;")
+		.replace(/"/g, "&quot;")
+		.replace(/'/g, "&#039;");
+}
+
+// Contact form API endpoint with rate limiting
+app.post("/api/contact", apiLimiter, async (req, res) => {
 	try {
 		const { name, email, message } = req.body;
 
-		// Validate input
+		// Validate required fields
 		if (!name || !email || !message) {
 			return res.status(400).json({
 				error: "Missing required fields",
 				details: "Name, email, and message are required",
+			});
+		}
+
+		// Validate input types
+		if (
+			typeof name !== "string" ||
+			typeof email !== "string" ||
+			typeof message !== "string"
+		) {
+			return res.status(400).json({
+				error: "Invalid input types",
+			});
+		}
+
+		// Validate input lengths to prevent abuse
+		if (name.length > 200 || email.length > 254 || message.length > 5000) {
+			return res.status(400).json({
+				error: "Input too long",
+				details: "Name (max 200), email (max 254), message (max 5000) characters",
 			});
 		}
 
@@ -56,18 +143,23 @@ app.post("/api/contact", async (req, res) => {
 			});
 		}
 
+		// Sanitize inputs before embedding in HTML
+		const safeName = escapeHtml(name.trim());
+		const safeEmail = escapeHtml(email.trim());
+		const safeMessage = escapeHtml(message.trim());
+
 		// Send email via Resend
 		const { data, error } = await resend.emails.send({
-			from: "contact@wdsit.com", // Must be verified domain
-			to: "info@wdsit.com", // Your receiving email
-			replyTo: email,
-			subject: `Contact Form: ${name}`,
+			from: "contact@wdsit.com",
+			to: "info@wdsit.com",
+			replyTo: email.trim(),
+			subject: `Contact Form: ${safeName}`,
 			html: `
 				<h2>New Contact Form Submission</h2>
-				<p><strong>Name:</strong> ${name}</p>
-				<p><strong>Email:</strong> ${email}</p>
+				<p><strong>Name:</strong> ${safeName}</p>
+				<p><strong>Email:</strong> ${safeEmail}</p>
 				<p><strong>Message:</strong></p>
-				<p>${message.replace(/\n/g, "<br>")}</p>
+				<p>${safeMessage.replace(/\n/g, "<br>")}</p>
 			`,
 		});
 
@@ -75,11 +167,10 @@ app.post("/api/contact", async (req, res) => {
 			console.error("Resend API error:", error);
 			return res.status(500).json({
 				error: "Failed to send email",
-				details: error.message,
 			});
 		}
 
-		console.log("Email sent successfully:", data);
+		console.log("Email sent successfully:", data?.id);
 		res.status(200).json({
 			success: true,
 			message: "Email sent successfully",
@@ -88,7 +179,6 @@ app.post("/api/contact", async (req, res) => {
 		console.error("Contact form error:", error);
 		res.status(500).json({
 			error: "Internal server error",
-			details: error.message,
 		});
 	}
 });
@@ -98,14 +188,9 @@ app.use(
 	express.static(path.join(__dirname, "build", "client"), {
 		maxAge: "1y",
 		immutable: true,
-		setHeaders: (res, path) => {
-			// Set security headers
-			res.setHeader("X-Content-Type-Options", "nosniff");
-			res.setHeader("X-Frame-Options", "SAMEORIGIN");
-			res.setHeader("X-XSS-Protection", "1; mode=block");
-
-			// Set caching headers for assets
-			if (path.includes("/assets/")) {
+		setHeaders: (res, filePath) => {
+			// Set caching headers for hashed assets
+			if (filePath.includes("/assets/")) {
 				res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
 			}
 		},
@@ -141,10 +226,7 @@ app.use((err, req, res, next) => {
 	console.error("Server error:", err);
 	res.status(500).json({
 		error: "Internal server error",
-		message:
-			process.env.NODE_ENV === "production"
-				? "Something went wrong"
-				: err.message,
+		...(process.env.NODE_ENV !== "production" && { message: err.message }),
 	});
 });
 

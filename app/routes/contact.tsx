@@ -137,6 +137,7 @@ export default function Contact() {
                     id="name"
                     name="name"
                     required
+                    maxLength={200}
                     className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-600 dark:focus:ring-primary-400 focus:border-transparent transition-colors"
                     placeholder="Your name"
                   />
@@ -151,6 +152,7 @@ export default function Contact() {
                     id="email"
                     name="email"
                     required
+                    maxLength={254}
                     className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-600 dark:focus:ring-primary-400 focus:border-transparent transition-colors"
                     placeholder="your.email@example.com"
                   />
@@ -165,6 +167,7 @@ export default function Contact() {
                     id="subject"
                     name="subject"
                     required
+                    maxLength={200}
                     className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-600 dark:focus:ring-primary-400 focus:border-transparent transition-colors"
                     placeholder="What can we help you with?"
                   />
@@ -179,6 +182,7 @@ export default function Contact() {
                     name="message"
                     required
                     rows={6}
+                    maxLength={5000}
                     className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-600 dark:focus:ring-primary-400 focus:border-transparent transition-colors resize-none"
                     placeholder="Tell us more about your project or question..."
                   />
