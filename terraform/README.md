@@ -1,6 +1,6 @@
 # Terraform Infrastructure Guide
 
-This directory contains Terraform configurations for deploying WDSIT.com to Google Cloud Run with Cloud CDN and Load Balancer.
+This directory contains Terraform configurations for deploying WDSIT.com with Cloud Run as origin behind Cloudflare (DNS, TLS, cache rules, and WAF).
 
 ## Prerequisites
 
@@ -22,6 +22,11 @@ cp terraform.tfvars.example terraform.tfvars
 Edit `terraform.tfvars` and set:
 - `project_id`: Your GCP project ID
 - `domain`: Your custom domain
+- `cloudflare_account_id`: Your Cloudflare account ID
+- `cloudflare_zone_id`: Your Cloudflare zone ID
+- `cloudflare_api_token`: Token with DNS, Zone Settings, and WAF edit scopes
+- `admin_ip_cidrs`: Admin IP/CIDR allowlist applied first to avoid lockout
+- `blocked_country_codes`: ISO country codes to block (optional)
 - Other configuration as needed
 
 ### 2. Initialize Terraform
@@ -47,22 +52,15 @@ terraform apply
 
 Review the plan and type `yes` to confirm.
 
-### 5. Configure DNS
+### 5. Cloudflare Cutover
 
-After Terraform completes, it will output a static IP address. Point your domain's DNS A records to this IP:
+Terraform creates proxied Cloudflare DNS CNAME records to the Cloud Run origin hostname and enables Full (strict) TLS mode.
 
-```
-A    @           <static_ip_address>
-A    www         <static_ip_address>
-```
+Cache bypass is configured for:
+- `/api/*`
+- `/health`
 
-### 6. Wait for SSL Certificate
-
-Google-managed SSL certificates can take up to 60 minutes to provision. Check status:
-
-```bash
-terraform output ssl_certificate_status
-```
+Managed WAF rules are enabled, with admin allowlist first and optional geo blocking.
 
 ## Resource Overview
 
@@ -70,10 +68,10 @@ terraform output ssl_certificate_status
 
 - **Cloud Run Service**: Serverless container service
 - **Artifact Registry**: Docker image repository
-- **Load Balancer**: Global HTTP(S) load balancer
-- **Cloud CDN**: Content delivery network for edge caching
-- **SSL Certificate**: Google-managed SSL/TLS certificate
-- **Static IP**: Global static IP address
+- **Cloudflare DNS**: Proxied records for `@` and `www`
+- **Cloudflare TLS**: `Full (strict)` mode
+- **Cloudflare WAF**: Managed rules + custom allowlist/geo block rules
+- **Cloudflare Cache Rules**: Cache bypass for dynamic and health endpoints
 - **IAM Service Accounts**: For Cloud Run and GitHub Actions
 - **Secret Manager**: For storing sensitive environment variables
 
@@ -81,10 +79,9 @@ terraform output ssl_certificate_status
 
 For low to moderate traffic:
 - Cloud Run: ~$10-30/month
-- Load Balancer: ~$20/month
 - Artifact Registry: ~$0.10/GB/month
-- Cloud CDN: $0.02-0.08/GB (data transfer)
-- **Total estimate**: ~$30-60/month
+- Cloudflare: depends on plan (can be $0 on Free tier)
+- **Total estimate**: materially lower than GCP LB + Cloud CDN architecture
 
 Actual costs depend on traffic and usage.
 
@@ -183,7 +180,7 @@ To create separate staging/production environments:
 ### Cloud Run Service Not Accessible
 
 - Verify IAM policy allows public access (allUsers)
-- Check load balancer backend health
+- Verify Cloudflare DNS records are proxied and target the Cloud Run hostname
 - Review Cloud Run service logs
 
 ### Terraform Apply Fails

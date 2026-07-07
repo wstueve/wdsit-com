@@ -21,3 +21,16 @@ concurrency = 80
 
 # Artifact Registry
 artifact_registry_location = "us-central1"
+
+# Cloudflare cutover (Cloud Run remains origin)
+cloudflare_account_id = "your-cloudflare-account-id"
+cloudflare_zone_id    = "your-cloudflare-zone-id"
+cloudflare_api_token  = "your-cloudflare-api-token"
+
+# Admin allowlist must be set first to prevent WAF lockout
+admin_ip_cidrs = ["203.0.113.10/32"]
+
+# ISO country codes for high-risk geoblocking
+blocked_country_codes = ["RU", "KP"]
+enable_geo_block      = true
+enable_cloudflare_cache_rules = false

@@ -76,3 +76,47 @@ variable "resend_api_key" {
   type        = string
   sensitive   = true
 }
+
+variable "cloudflare_account_id" {
+  description = "Cloudflare account ID"
+  type        = string
+}
+
+variable "cloudflare_zone_id" {
+  description = "Cloudflare zone ID for the domain"
+  type        = string
+}
+
+variable "cloudflare_api_token" {
+  description = "Cloudflare API token with DNS, Zone settings, and WAF permissions"
+  type        = string
+  sensitive   = true
+}
+
+variable "admin_ip_cidrs" {
+  description = "Admin IP/CIDR allowlist applied before WAF and geo controls"
+  type        = list(string)
+
+  validation {
+    condition     = length(var.admin_ip_cidrs) > 0
+    error_message = "Provide at least one admin IP/CIDR to avoid lockout during WAF cutover."
+  }
+}
+
+variable "blocked_country_codes" {
+  description = "ISO 3166-1 alpha-2 country codes to block at Cloudflare edge"
+  type        = list(string)
+  default     = []
+}
+
+variable "enable_geo_block" {
+  description = "Enable or disable custom geo blocking rule"
+  type        = bool
+  default     = true
+}
+
+variable "enable_cloudflare_cache_rules" {
+  description = "Enable Cloudflare cache rules resources when token supports ruleset APIs"
+  type        = bool
+  default     = true
+}

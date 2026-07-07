@@ -1,0 +1,52 @@
+You are working in /Users/mach3/code/wds-it/wdsit-com.
+
+Objective:
+Execute a fast Cloudflare WAF cutover for wdsit.com to reduce GCP cost, accepting temporary downtime if needed, and then upgrade dependencies and patch vulnerabilities.
+
+Constraints and intent:
+- Prioritize cheapest architecture.
+- Remove GCP load balancer, Cloud CDN, and Cloud Armor after Cloudflare is live.
+- Keep Cloud Run as origin.
+- Enforce Full strict TLS.
+- Implement country blocking for high-risk countries requested by user.
+- Add admin IP allowlist rule first to prevent lockout.
+- Do not stop at planning. Implement changes in code and Terraform.
+
+Already known from repository:
+- Dynamic endpoints: /api/contact and /health in server.js.
+- Existing GCP LB and Cloud Armor resources are in terraform/load-balancer.tf.
+- Contact frontend currently simulates submission in app/routes/contact.tsx, but /api/contact exists server-side.
+
+Execution requirements:
+1. Gather missing runtime values from user only when required:
+   - Cloudflare account ID
+   - Zone ID
+   - API token scope confirmation
+   - Admin IP/CIDR
+   - Final country list
+2. Implement Cloudflare Terraform resources and variables in terraform/ files.
+3. Remove GCP load-balancer and Cloud Armor resources from Terraform once Cloudflare path is ready.
+4. Keep Cloud Run resources intact.
+5. Ensure cache bypass rules include /api/* and /health.
+6. Configure WAF managed rules + custom geo block + admin allowlist.
+7. Produce a clear rollback section in output.
+8. At end, perform package and security updates:
+   - npm outdated
+   - npm update
+   - npm audit
+   - npm audit fix
+   - Resolve remaining issues with targeted dependency updates when practical.
+9. Validate with:
+   - npm run build
+   - Single Playwright tests first with --reporter=list
+   - Full Playwright suite once singles pass: npx playwright test --reporter=list
+10. Summarize:
+   - Files changed
+   - Terraform resources added/removed
+   - Validation results
+   - Remaining risks
+
+Implementation preference:
+- Use apply_patch for edits.
+- Keep changes minimal and production-safe.
+- If a command fails, diagnose and continue until fully resolved.

@@ -1,0 +1,131 @@
+# Cloudflare WAF Fast Cutover Plan (Downtime Accepted)
+
+## Goal
+Move edge security and caching to Cloudflare, reduce GCP networking cost, and remove expensive GCP load balancer and Cloud Armor resources.
+
+## Current State (Validated)
+- GCP global HTTPS load balancer + Cloud CDN + Cloud Armor exist in Terraform.
+- Cloud Run serves the app and has a health endpoint at /health.
+- API endpoint exists at /api/contact.
+- Contact page currently simulates submit in client code; API route still exists server-side.
+
+## Target State
+- Cloudflare is authoritative DNS and proxy for apex + www.
+- Cloudflare WAF is primary edge protection.
+- Cloud Run custom domain mapping is the origin.
+- GCP load balancer, static IP, CDN backend settings, and Cloud Armor are removed.
+- Full strict TLS from client to Cloudflare to origin.
+
+## Fast Path Assumptions
+- Temporary downtime during nameserver and DNS changes is acceptable.
+- No requirement for zero-downtime migration.
+- Cloudflare Free plan is used.
+- Country-level blocking is acceptable.
+
+## Required Inputs Before Execution
+1. Cloudflare account email and account ID.
+2. Cloudflare API token with least privileges for zone DNS, rulesets, and settings.
+3. Zone ID for wdsit.com.
+4. Registrar access where nameservers are currently managed.
+5. Admin allowlist IP or CIDR for safe access.
+6. Final block country list (ISO codes), for example RU, IR, KP, CN.
+
+## Execution Plan
+
+### Phase 1: Prepare Origin
+1. Verify Cloud Run domain mapping exists for wdsit.com and www.wdsit.com.
+2. Verify TLS cert on mapped domains is active.
+3. Confirm health endpoint responds from origin.
+
+Validation
+- curl -I https://wdsit.com/health returns 200 after mapping is active.
+
+### Phase 2: Cloudflare Zone + DNS
+1. Add zone wdsit.com to Cloudflare.
+2. Create proxied DNS records for apex and www to Cloud Run mapped origin target.
+3. Change registrar nameservers to Cloudflare nameservers.
+4. Wait for NS propagation.
+
+Validation
+- dig NS wdsit.com shows Cloudflare nameservers.
+- Browser and curl access through Cloudflare succeed.
+
+### Phase 3: WAF, Bot, and Geo Controls
+1. Enable Cloudflare managed WAF rulesets.
+2. Add custom rule to allow admin IP/CIDR first.
+3. Add geo-block rule for selected countries.
+4. Enable bot protection available on Free plan.
+5. Add challenge rules for suspicious traffic patterns rather than all traffic.
+
+Important
+- Challenging all traffic can damage UX and SEO; use targeted challenge criteria.
+
+Validation
+- Request from allowlisted admin IP is never blocked.
+- Requests from blocked countries are denied.
+
+### Phase 4: Caching Rules
+1. Cache static assets aggressively.
+2. Bypass cache for /api/* and /health.
+3. Keep HTML cache conservative initially.
+
+Validation
+- /api/contact remains functional.
+- /health always bypasses cache and returns fresh response.
+
+### Phase 5: Remove GCP Cost Drivers
+1. Remove Terraform resources for:
+   - google_compute_security_policy
+   - google_compute_global_address
+   - google_compute_region_network_endpoint_group
+   - google_compute_backend_service
+   - google_compute_url_map
+   - google_compute_managed_ssl_certificate
+   - google_compute_target_https_proxy
+   - google_compute_target_http_proxy
+   - google_compute_global_forwarding_rule resources
+2. Keep Cloud Run, IAM, Secret Manager, and deployment pipeline.
+3. Apply Terraform and verify no orphaned dependency remains.
+
+Validation
+- Site reachable through Cloudflare.
+- GCP LB and Cloud Armor resources no longer billed.
+
+### Phase 6: Post-Cutover Verification
+1. Smoke test critical routes: /, /about, /contact, /privacy, /terms, /health.
+2. Validate API endpoint and rate-limiting behavior.
+3. Check Cloudflare security events and WAF analytics.
+4. Check GCP billing after 24 to 72 hours.
+
+## Rollback (If Needed)
+1. Revert nameservers at registrar to prior provider.
+2. Temporarily disable blocking/challenge rules in Cloudflare.
+3. Re-enable prior GCP edge stack from Terraform if required.
+
+## Security and Dependency Upgrade Phase (Do Last)
+Run this after edge migration is stable:
+
+1. Install latest safe dependency updates:
+- npm outdated
+- npm update
+
+2. Patch known vulnerabilities:
+- npm audit
+- npm audit fix
+
+3. For unresolved vulnerabilities:
+- Upgrade direct dependencies with breaking changes only after targeted test pass.
+
+4. Validate application and tests:
+- npm run build
+- npx playwright test tests/e2e/navigation.spec.ts --reporter=list
+- npx playwright test tests/e2e/contact-form.spec.ts --reporter=list
+- npx playwright test tests/accessibility/wcag.spec.ts --reporter=list
+- npx playwright test --reporter=list
+
+## Acceptance Criteria
+- Cloudflare is active edge for apex and www.
+- WAF and country block policy are enforced.
+- /api/* and /health are excluded from cache and not broken.
+- GCP LB, CDN, and Cloud Armor are removed and no longer billed.
+- Dependency/security updates applied with passing build and tests.

@@ -76,6 +76,16 @@ const generalLimiter = rateLimit({
 });
 app.use(generalLimiter);
 
+// Ensure dynamic endpoints are never cached by intermediaries.
+app.use((req, res, next) => {
+	if (req.path === "/health" || req.path.startsWith("/api/")) {
+		res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+		res.setHeader("Pragma", "no-cache");
+		res.setHeader("Expires", "0");
+	}
+	next();
+});
+
 // Health check endpoint for Cloud Run
 app.get("/health", (req, res) => {
 	res.status(200).json({ status: "healthy" });
