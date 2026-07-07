@@ -1,7 +1,6 @@
 # Cloudflare edge configuration with Cloud Run as origin
 
 locals {
-  cloud_run_origin_hostname = trimsuffix(replace(google_cloud_run_v2_service.wdsit_app.uri, "https://", ""), "/")
   cloud_run_mapping_ipv4 = [
     "216.239.32.21",
     "216.239.34.21",
@@ -27,7 +26,7 @@ resource "cloudflare_dns_record" "root_a" {
   name    = "@"
   type    = "A"
   content = each.value
-  proxied = false
+  proxied = true
   ttl     = 1
 }
 
@@ -38,7 +37,7 @@ resource "cloudflare_dns_record" "root_aaaa" {
   name    = "@"
   type    = "AAAA"
   content = each.value
-  proxied = false
+  proxied = true
   ttl     = 1
 }
 
@@ -157,6 +156,7 @@ resource "cloudflare_ruleset" "cache_settings" {
       action      = "set_cache_settings"
       enabled     = true
       action_parameters = {
+        cache = false
         browser_ttl = {
           mode = "bypass"
         }
@@ -165,13 +165,14 @@ resource "cloudflare_ruleset" "cache_settings" {
     {
       ref         = "default-cache-policy"
       description = "Use origin caching for all other paths"
-      expression  = "true"
+      expression  = "not starts_with(http.request.uri.path, \"/api/\") and http.request.uri.path ne \"/health\""
       action      = "set_cache_settings"
       enabled     = true
       action_parameters = {
         cache = true
         edge_ttl = {
-          mode = "respect_origin"
+          mode    = "override_origin"
+          default = 3600
         }
         browser_ttl = {
           mode = "respect_origin"

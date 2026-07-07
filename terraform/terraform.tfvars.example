@@ -33,4 +33,4 @@ admin_ip_cidrs = ["203.0.113.10/32"]
 # ISO country codes for high-risk geoblocking
 blocked_country_codes = ["RU", "KP"]
 enable_geo_block      = true
-enable_cloudflare_cache_rules = false
+enable_cloudflare_cache_rules = true
