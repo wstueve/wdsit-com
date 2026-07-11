@@ -32,7 +32,7 @@ variable "environment" {
 variable "min_instances" {
   description = "Minimum number of Cloud Run instances"
   type        = number
-  default     = 2
+  default     = 0
 }
 
 variable "max_instances" {

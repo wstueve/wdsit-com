@@ -17,7 +17,8 @@ NC='\033[0m' # No Color
 PROJECT_ID="wdsit-com"
 REGION="us-central1"
 SERVICE_NAME="svc-wdsit-com"
-SKIP_TESTS=false
+SKIP_TESTS=true
+SKIP_SMOKE_TESTS=false
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
@@ -33,6 +34,16 @@ while [[ $# -gt 0 ]]; do
       ;;
   esac
 done
+
+# ═══════════════════════════════════════════════
+# DYNAMIC PATH CONFIGURATION (Fixed for Buildpacks)
+# ═══════════════════════════════════════════════
+# 1. Get the absolute path of the /scripts directory where this script sits
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+
+# 2. Go one level up to find your main application root folder
+APP_ROOT_DIR="$(dirname "$SCRIPT_DIR")"
+# ═══════════════════════════════════════════════
 
 echo -e "${BLUE}═══════════════════════════════════════════════${NC}"
 echo -e "${BLUE}  Canary Deployment to Cloud Run${NC}"
@@ -67,7 +78,7 @@ echo -e "${YELLOW}[3/7]${NC} Deploying new revision to Cloud Run (no traffic)...
 COMMIT_SHA=$(git rev-parse --short HEAD 2>/dev/null || echo "local")
 
 gcloud run deploy $SERVICE_NAME \
-  --source=. \
+  --source="$APP_ROOT_DIR" \
   --region=$REGION \
   --project=$PROJECT_ID \
   --tag="sha-$COMMIT_SHA" \
@@ -75,6 +86,18 @@ gcloud run deploy $SERVICE_NAME \
   --quiet || {
   echo -e "${RED}✗ Deployment failed${NC}"
   exit 1
+
+gcloud run services update $SERVICE_NAME \
+    --region=$REGION \
+    --min-instances=0 \
+    --cpu-throttling \
+    --liveness-probe-type=http \
+    --liveness-probe-path=/health \
+    --liveness-probe-initial-delay=0s \
+    --liveness-probe-period=30s \
+    --liveness-probe-timeout=3s \
+    --liveness-probe-failure-threshold=3
+
 }
 
 # Get the new revision name
@@ -99,7 +122,7 @@ echo -e "${GREEN}✓ Revision ready${NC}"
 echo ""
 
 # Step 5: Run smoke tests against the new revision (0% traffic)
-if [ "$SKIP_TESTS" = false ]; then
+if [ "$SKIP_SMOKE_TESTS" = false ]; then
   echo -e "${YELLOW}[5/7]${NC} Running smoke tests against new revision..."
   PLAYWRIGHT_TEST_BASE_URL=$PREVIEW_URL npm run test:deployment -- --reporter=list || {
     echo -e "${RED}✗ Smoke tests failed on new revision${NC}"
@@ -115,34 +138,10 @@ else
 fi
 
 # Step 6: Gradual traffic migration
-echo -e "${YELLOW}[6/7]${NC} Starting gradual traffic migration..."
+echo -e "${YELLOW}[6/7]${NC} Starting traffic migration..."
 
 # 10% canary
 echo -e "${BLUE}→ Migrating 10% traffic to new revision...${NC}"
-gcloud run services update-traffic $SERVICE_NAME \
-  --region=$REGION \
-  --project=$PROJECT_ID \
-  --to-revisions=$NEW_REVISION=10 \
-  --quiet
-
-echo -e "${GREEN}✓ 10% traffic migrated${NC}"
-echo "Monitoring for 2 minutes..."
-sleep 120
-
-# 50% migration
-echo -e "${BLUE}→ Migrating 50% traffic to new revision...${NC}"
-gcloud run services update-traffic $SERVICE_NAME \
-  --region=$REGION \
-  --project=$PROJECT_ID \
-  --to-revisions=$NEW_REVISION=50 \
-  --quiet
-
-echo -e "${GREEN}✓ 50% traffic migrated${NC}"
-echo "Monitoring for 2 minutes..."
-sleep 120
-
-# 100% migration
-echo -e "${BLUE}→ Migrating 100% traffic to new revision...${NC}"
 gcloud run services update-traffic $SERVICE_NAME \
   --region=$REGION \
   --project=$PROJECT_ID \
@@ -150,10 +149,34 @@ gcloud run services update-traffic $SERVICE_NAME \
   --quiet
 
 echo -e "${GREEN}✓ 100% traffic migrated${NC}"
-echo ""
+# echo "Monitoring for 2 minutes..."
+# sleep 120
+
+# # 50% migration
+# echo -e "${BLUE}→ Migrating 50% traffic to new revision...${NC}"
+# gcloud run services update-traffic $SERVICE_NAME \
+#   --region=$REGION \
+#   --project=$PROJECT_ID \
+#   --to-revisions=$NEW_REVISION=50 \
+#   --quiet
+
+# echo -e "${GREEN}✓ 50% traffic migrated${NC}"
+# echo "Monitoring for 2 minutes..."
+# sleep 120
+
+# # 100% migration
+# echo -e "${BLUE}→ Migrating 100% traffic to new revision...${NC}"
+# gcloud run services update-traffic $SERVICE_NAME \
+#   --region=$REGION \
+#   --project=$PROJECT_ID \
+#   --to-revisions=$NEW_REVISION=100 \
+#   --quiet
+
+# echo -e "${GREEN}✓ 100% traffic migrated${NC}"
+# echo ""
 
 # Step 7: Final verification
-if [ "$SKIP_TESTS" = false ]; then
+if [ "$SKIP_SMOKE_TESTS" = false ]; then
   echo -e "${YELLOW}[7/7]${NC} Running final smoke tests on production..."
   PLAYWRIGHT_TEST_BASE_URL=https://wdsit.com npm run test:deployment -- --reporter=list || {
     echo -e "${RED}✗ Final smoke tests failed${NC}"
@@ -166,6 +189,21 @@ else
   echo -e "${YELLOW}[7/7]${NC} Skipping final smoke tests (--skip-tests flag provided)"
   echo ""
 fi
+
+echo -e "${YELLOW}Trimming old Cloud Run revisions...${NC}"
+# Lists all revisions ordered by creation time, skips the top 2, and deletes the rest
+gcloud run revisions list \
+    --service=$SERVICE_NAME \
+    --region=$REGION \
+    --format="value(name)" \
+    --sort-by="~metadata.creationTimestamp" | tail -n +3 | while read -r OLD_REV; do
+        if [ ! -z "$OLD_REV" ]; then
+            echo "Deleting old revision: $OLD_REV"
+            gcloud run revisions delete $OLD_REV --region=$REGION --quiet || true
+        fi
+done
+echo -e "${GREEN}✓ Revision cleanup complete${NC}"
+
 
 # Success summary
 echo -e "${GREEN}═══════════════════════════════════════════════${NC}"

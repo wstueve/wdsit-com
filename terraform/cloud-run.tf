@@ -71,7 +71,7 @@ resource "google_cloud_run_v2_service" "wdsit_app" {
           path = "/health"
           port = 8080
         }
-        initial_delay_seconds = 30
+        initial_delay_seconds = 0
         timeout_seconds       = 3
         period_seconds        = 30
         failure_threshold     = 3
@@ -99,10 +99,14 @@ resource "google_cloud_run_v2_service" "wdsit_app" {
   lifecycle {
     ignore_changes = [
       # Allow gcloud CLI to update the service without Terraform interference
-      template[0].containers[0].image,
-      template[0].revision,
+      template,
+      # This code doesn't manage the container image or revision directly, as deployments are handled via gcloud CLI
+      #template[0].containers[0].image,
+      #template[0].revision,
+
       # Allow canary deployment script to manage traffic splits
       traffic,
+
       # Ignore gcloud-specific metadata
       client,
       client_version,
