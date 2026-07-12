@@ -22,36 +22,36 @@ app.set("trust proxy", true);
 
 // Security headers via helmet
 app.use(
-	helmet({
-		contentSecurityPolicy: {
-			directives: {
-				defaultSrc: ["'self'"],
-				scriptSrc: ["'self'", "'unsafe-inline'"],
-				styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-				imgSrc: ["'self'", "data:", "https:"],
-				fontSrc: ["'self'", "https://fonts.gstatic.com"],
-				connectSrc: ["'self'"],
-				frameAncestors: ["'none'"],
-				baseUri: ["'self'"],
-				formAction: ["'self'"],
-				upgradeInsecureRequests: [],
-			},
-		},
-		referrerPolicy: { policy: "strict-origin-when-cross-origin" },
-		hsts: {
-			maxAge: 63072000, // 2 years
-			includeSubDomains: true,
-			preload: true,
-		},
-		permissionsPolicy: {
-			features: {
-				camera: ["'none'"],
-				microphone: ["'none'"],
-				geolocation: ["'none'"],
-				payment: ["'none'"],
-			},
-		},
-	}),
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'", "https://static.cloudflareinsights.com"],
+        styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+        imgSrc: ["'self'", "data:", "https:"],
+        fontSrc: ["'self'", "https://fonts.gstatic.com"],
+        connectSrc: ["'self'", "https://static.cloudflareinsights.com"],
+        frameAncestors: ["'none'"],
+        baseUri: ["'self'"],
+        formAction: ["'self'"],
+        upgradeInsecureRequests: [],
+      },
+    },
+    referrerPolicy: { policy: "strict-origin-when-cross-origin" },
+    hsts: {
+      maxAge: 63072000, // 2 years
+      includeSubDomains: true,
+      preload: true,
+    },
+    permissionsPolicy: {
+      features: {
+        camera: ["'none'"],
+        microphone: ["'none'"],
+        geolocation: ["'none'"],
+        payment: ["'none'"],
+      },
+    },
+  }),
 );
 
 // Middleware with body size limits to prevent DoS

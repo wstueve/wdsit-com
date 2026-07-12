@@ -201,6 +201,7 @@ dist
 .env.*
 !.env.example
 .env.backup
+env.sh
 
 ### React Router ###
 .react-router/

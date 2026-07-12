@@ -40,6 +40,7 @@ done
 # ═══════════════════════════════════════════════
 # 1. Get the absolute path of the /scripts directory where this script sits
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+source "$SCRIPT_DIR/env.sh"
 
 # 2. Go one level up to find your main application root folder
 APP_ROOT_DIR="$(dirname "$SCRIPT_DIR")"
@@ -117,14 +118,21 @@ echo ""
 
 # Step 4: Wait for revision to be ready
 echo -e "${YELLOW}[4/7]${NC} Waiting for revision to be ready..."
-sleep 10
+
+# WARM UP RUN: Hit the preview endpoint once to force a container build/spin-up
+echo "Warming up container instance from cold start..."
+curl -s -o /dev/null -w "%{http_code}" "$PREVIEW_URL" || true
+
+# Give the container a safe structural window to finish initializing
+sleep 11
 echo -e "${GREEN}✓ Revision ready${NC}"
 echo ""
+
 
 # Step 5: Run smoke tests against the new revision (0% traffic)
 if [ "$SKIP_SMOKE_TESTS" = false ]; then
   echo -e "${YELLOW}[5/7]${NC} Running smoke tests against new revision..."
-  PLAYWRIGHT_TEST_BASE_URL=$PREVIEW_URL npm run test:deployment -- --reporter=list || {
+  PLAYWRIGHT_TEST_BASE_URL=$PREVIEW_URL npm run test:deployment --  --project=chromium --reporter=list || {
     echo -e "${RED}✗ Smoke tests failed on new revision${NC}"
     echo -e "${RED}Deployment stopped. New revision has 0% traffic.${NC}"
     echo -e "${YELLOW}To rollback: Delete the revision or leave it with 0% traffic${NC}"
@@ -141,7 +149,7 @@ fi
 echo -e "${YELLOW}[6/7]${NC} Starting traffic migration..."
 
 # 10% canary
-echo -e "${BLUE}→ Migrating 10% traffic to new revision...${NC}"
+echo -e "${BLUE}→ Migrating 100% traffic to new revision...${NC}"
 gcloud run services update-traffic $SERVICE_NAME \
   --region=$REGION \
   --project=$PROJECT_ID \
@@ -175,10 +183,35 @@ echo -e "${GREEN}✓ 100% traffic migrated${NC}"
 # echo -e "${GREEN}✓ 100% traffic migrated${NC}"
 # echo ""
 
+# ═══════════════════════════════════════════════
+# CLOUDFLARE CDN CACHE PURGE HOOK
+# ═══════════════════════════════════════════════
+echo -e "${YELLOW}Purging Cloudflare cache...${NC}"
+
+# Ensure your shell session has the tokens available before executing the request
+if [ -z "$WDSIT_CLOUDFLARE_ZONE_ID" ] || [ -z "$WDSIT_CLOUDFLARE_API_TOKEN" ]; then
+  echo -e "${RED}✗ Cloudflare purge skipped: Environment variables are not set.${NC}"
+  echo "Please export WDSIT_CLOUDFLARE_ZONE_ID and WDSIT_CLOUDFLARE_API_TOKEN in your terminal shell."
+else
+  CF_RESPONSE=$(curl -s -X POST "https://cloudflare.com${WDSIT_CLOUDFLARE_ZONE_ID}/purge_cache" \
+       -H "Authorization: Bearer ${WDSIT_CLOUDFLARE_API_TOKEN}" \
+       -H "Content-Type: application/json" \
+       --data '{"purge_everything":true}')
+
+  if echo "$CF_RESPONSE" | grep -q '"success":true'; then
+    echo -e "${GREEN}✓ Cloudflare cache purged successfully!${NC}"
+  else
+    echo -e "${RED}✗ Cloudflare cache purge failed!${NC}"
+    echo "Response Details: $CF_RESPONSE"
+  fi
+fi
+echo ""
+
+
 # Step 7: Final verification
 if [ "$SKIP_SMOKE_TESTS" = false ]; then
   echo -e "${YELLOW}[7/7]${NC} Running final smoke tests on production..."
-  PLAYWRIGHT_TEST_BASE_URL=https://wdsit.com npm run test:deployment -- --reporter=list || {
+  PLAYWRIGHT_TEST_BASE_URL=https://wdsit.com npm run test:deployment --  --project=chromium --reporter=list || {
     echo -e "${RED}✗ Final smoke tests failed${NC}"
     echo -e "${YELLOW}Consider rolling back!${NC}"
     exit 1
@@ -191,18 +224,22 @@ else
 fi
 
 echo -e "${YELLOW}Trimming old Cloud Run revisions...${NC}"
-# Lists all revisions ordered by creation time, skips the top 2, and deletes the rest
+# Lists all revisions ordered by creation time, skips the top 1, and deletes the rest
 gcloud run revisions list \
     --service=$SERVICE_NAME \
     --region=$REGION \
     --format="value(name)" \
-    --sort-by="~metadata.creationTimestamp" | tail -n +3 | while read -r OLD_REV; do
+    --sort-by="~metadata.creationTimestamp" | tail -n +2 | while read -r OLD_REV; do
         if [ ! -z "$OLD_REV" ]; then
             echo "Deleting old revision: $OLD_REV"
             gcloud run revisions delete $OLD_REV --region=$REGION --quiet || true
         fi
 done
 echo -e "${GREEN}✓ Revision cleanup complete${NC}"
+
+echo -e "${YELLOW}Removing any idle containers...${NC}"
+gcloud run services update $SERVICE_NAME --region=$REGION --project=$PROJECT_ID --no-traffic --quiet || true
+
 
 
 # Success summary

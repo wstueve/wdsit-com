@@ -6,7 +6,6 @@ import {
   Scripts,
   ScrollRestoration,
 } from "react-router";
-
 import type { Route } from "./+types/root";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import "./app.css";
@@ -30,8 +29,16 @@ export function meta() {
   return [
     { charSet: "utf-8" },
     { name: "viewport", content: "width=device-width, initial-scale=1" },
-    { name: "theme-color", content: "#2563eb", media: "(prefers-color-scheme: light)" },
-    { name: "theme-color", content: "#1e3a8a", media: "(prefers-color-scheme: dark)" },
+    {
+      name: "theme-color",
+      content: "#2563eb",
+      media: "(prefers-color-scheme: light)",
+    },
+    {
+      name: "theme-color",
+      content: "#1e3a8a",
+      media: "(prefers-color-scheme: dark)",
+    },
     { property: "og:site_name", content: "WDS IT" },
     { property: "og:locale", content: "en_US" },
     { name: "twitter:card", content: "summary_large_image" },
@@ -42,17 +49,15 @@ export function Layout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <meta charSet="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
         <Meta />
         <Links />
+        
         <script
           dangerouslySetInnerHTML={{
             __html: `
               (function() {
                 const stored = localStorage.getItem('theme');
                 const root = document.documentElement;
-                
                 if (stored && stored !== 'auto') {
                   root.setAttribute('data-theme', stored);
                 } else {
@@ -71,39 +76,41 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </body>
     </html>
   );
-}export default function App() {
-	return (
-		<ThemeProvider>
-			<Outlet />
-		</ThemeProvider>
-	);
+}
+
+export default function App() {
+  return (
+    <ThemeProvider>
+      <Outlet />
+    </ThemeProvider>
+  );
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
-	let message = "Oops!";
-	let details = "An unexpected error occurred.";
-	let stack: string | undefined;
+  let message = "Oops!";
+  let details = "An unexpected error occurred.";
+  let stack: string | undefined;
 
-	if (isRouteErrorResponse(error)) {
-		message = error.status === 404 ? "404" : "Error";
-		details =
-			error.status === 404
-				? "The requested page could not be found."
-				: error.statusText || details;
-	} else if (import.meta.env.DEV && error && error instanceof Error) {
-		details = error.message;
-		stack = error.stack;
-	}
+  if (isRouteErrorResponse(error)) {
+    message = error.status === 404 ? "404" : "Error";
+    details =
+      error.status === 404
+        ? "The requested page could not be found."
+        : error.statusText || details;
+  } else if (import.meta.env.DEV && error && error instanceof Error) {
+    details = error.message;
+    stack = error.stack;
+  }
 
-	return (
-		<main className="pt-16 p-4 container mx-auto">
-			<h1>{message}</h1>
-			<p>{details}</p>
-			{stack && (
-				<pre className="w-full p-4 overflow-x-auto">
-					<code>{stack}</code>
-				</pre>
-			)}
-		</main>
-	);
+  return (
+    <main className="pt-16 p-4 container mx-auto">
+      <h1>{message}</h1>
+      <p>{details}</p>
+      {stack && (
+        <pre className="w-full p-4 overflow-x-auto">
+          <code>{stack}</code>
+        </pre>
+      )}
+    </main>
+  );
 }
