@@ -157,31 +157,6 @@ gcloud run services update-traffic $SERVICE_NAME \
   --quiet
 
 echo -e "${GREEN}✓ 100% traffic migrated${NC}"
-# echo "Monitoring for 2 minutes..."
-# sleep 120
-
-# # 50% migration
-# echo -e "${BLUE}→ Migrating 50% traffic to new revision...${NC}"
-# gcloud run services update-traffic $SERVICE_NAME \
-#   --region=$REGION \
-#   --project=$PROJECT_ID \
-#   --to-revisions=$NEW_REVISION=50 \
-#   --quiet
-
-# echo -e "${GREEN}✓ 50% traffic migrated${NC}"
-# echo "Monitoring for 2 minutes..."
-# sleep 120
-
-# # 100% migration
-# echo -e "${BLUE}→ Migrating 100% traffic to new revision...${NC}"
-# gcloud run services update-traffic $SERVICE_NAME \
-#   --region=$REGION \
-#   --project=$PROJECT_ID \
-#   --to-revisions=$NEW_REVISION=100 \
-#   --quiet
-
-# echo -e "${GREEN}✓ 100% traffic migrated${NC}"
-# echo ""
 
 # ═══════════════════════════════════════════════
 # CLOUDFLARE CDN CACHE PURGE HOOK
@@ -193,17 +168,12 @@ if [ -z "$WDSIT_CLOUDFLARE_ZONE_ID" ] || [ -z "$WDSIT_CLOUDFLARE_API_TOKEN" ]; t
   echo -e "${RED}✗ Cloudflare purge skipped: Environment variables are not set.${NC}"
   echo "Please export WDSIT_CLOUDFLARE_ZONE_ID and WDSIT_CLOUDFLARE_API_TOKEN in your terminal shell."
 else
-  CF_RESPONSE=$(curl -s -X POST "https://cloudflare.com${WDSIT_CLOUDFLARE_ZONE_ID}/purge_cache" \
+  echo "Flushing Cloudflare Edge Cache..."
+  curl -s -X POST "https://api.cloudflare.com/client/v4/zones/${WDSIT_CLOUDFLARE_ZONE_ID}/purge_cache" \
        -H "Authorization: Bearer ${WDSIT_CLOUDFLARE_API_TOKEN}" \
        -H "Content-Type: application/json" \
-       --data '{"purge_everything":true}')
-
-  if echo "$CF_RESPONSE" | grep -q '"success":true'; then
-    echo -e "${GREEN}✓ Cloudflare cache purged successfully!${NC}"
-  else
-    echo -e "${RED}✗ Cloudflare cache purge failed!${NC}"
-    echo "Response Details: $CF_RESPONSE"
-  fi
+       --data '{"purge_everything":true}' | grep -q '"success":true' \
+       && echo "✓ Cache completely cleared!" || echo "✗ Purge request failed."
 fi
 echo ""
 
@@ -235,12 +205,16 @@ gcloud run revisions list \
             gcloud run revisions delete $OLD_REV --region=$REGION --quiet || true
         fi
 done
-echo -e "${GREEN}✓ Revision cleanup complete${NC}"
+echo -e "${GREEN}✓ Revision cleanup complete. Current Cloud Run revisions:${NC}"
 
-echo -e "${YELLOW}Removing any idle containers...${NC}"
-gcloud run services update $SERVICE_NAME --region=$REGION --project=$PROJECT_ID --no-traffic --quiet || true
+gcloud run revisions list \
+    --service=$SERVICE_NAME \
+    --region=$REGION \
+    --format="value(name)" \
+    --sort-by="~metadata.creationTimestamp"
 
-
+echo ""
+echo ""
 
 # Success summary
 echo -e "${GREEN}═══════════════════════════════════════════════${NC}"
