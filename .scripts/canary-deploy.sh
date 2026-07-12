@@ -1,5 +1,4 @@
 #!/bin/bash
-
 # Canary Deployment Script for Cloud Run
 # Tests new revision before gradually migrating traffic
 # Usage: ./scripts/canary-deploy.sh [--skip-tests]
@@ -69,8 +68,8 @@ fi
 # Step 2: Build the application
 echo -e "${YELLOW}[2/7]${NC} Building application..."
 npm run build || {
-  echo -e "${RED}✗ Build failed${NC}"
-  exit 1
+    echo -e "${RED}✗ Build failed${NC}"
+    exit 1
 }
 echo -e "${GREEN}✓ Build successful${NC}"
 echo ""
@@ -86,20 +85,18 @@ gcloud run deploy $SERVICE_NAME \
   --tag="sha-$COMMIT_SHA" \
   --no-traffic \
   --quiet || {
-  echo -e "${RED}✗ Deployment failed${NC}"
-  exit 1
-
-gcloud run services update $SERVICE_NAME \
-    --region=$REGION \
-    --min-instances=0 \
-    --cpu-throttling \
-    --liveness-probe-type=http \
-    --liveness-probe-path=/health \
-    --liveness-probe-initial-delay=0s \
-    --liveness-probe-period=30s \
-    --liveness-probe-timeout=3s \
-    --liveness-probe-failure-threshold=3
-
+    echo -e "${RED}✗ Deployment failed${NC}"
+    exit 1
+    gcloud run services update $SERVICE_NAME \
+      --region=$REGION \
+      --min-instances=0 \
+      --cpu-throttling \
+      --liveness-probe-type=http \
+      --liveness-probe-path=/health \
+      --liveness-probe-initial-delay=0s \
+      --liveness-probe-period=30s \
+      --liveness-probe-timeout=3s \
+      --liveness-probe-failure-threshold=3
 }
 
 # Get the new revision name
@@ -110,10 +107,11 @@ NEW_REVISION=$(gcloud run revisions list \
   --format="value(name)" \
   --limit=1)
 
-PROJECT_NUMBER=$(gcloud projects describe $PROJECT_ID --format="value(projectNumber)")
-
 # Get the preview URL for the tagged revision
-PREVIEW_URL="https://sha-$COMMIT_SHA---$SERVICE_NAME-$PROJECT_NUMBER.$REGION.run.app"
+PREVIEW_URL=$(gcloud run services describe $SERVICE_NAME \
+  --region=$REGION \
+  --project=$PROJECT_ID \
+  --format="value(status.traffic.where(tag=sha-$COMMIT_SHA).url)")
 
 echo -e "${GREEN}✓ New revision deployed: $NEW_REVISION${NC}"
 echo -e "${BLUE}Preview URL: $PREVIEW_URL${NC}"
@@ -121,7 +119,6 @@ echo ""
 
 # Step 4: Wait for revision to be ready
 echo -e "${YELLOW}[4/7]${NC} Waiting for revision to be ready..."
-
 # WARM UP RUN: Hit the preview endpoint once to force a container build/spin-up
 echo "Warming up container instance from cold start..."
 curl -s -o /dev/null -w "%{http_code}" "$PREVIEW_URL" || true
@@ -131,11 +128,10 @@ sleep 11
 echo -e "${GREEN}✓ Revision ready${NC}"
 echo ""
 
-
 # Step 5: Run smoke tests against the new revision (0% traffic)
 if [ "$SKIP_SMOKE_TESTS" = false ]; then
   echo -e "${YELLOW}[5/7]${NC} Running smoke tests against new revision..."
-  PLAYWRIGHT_TEST_BASE_URL=$PREVIEW_URL npm run test:deployment --  --project=chromium --reporter=list || {
+  PLAYWRIGHT_TEST_BASE_URL=$PREVIEW_URL npm run test:deployment -- --project=chromium --reporter=list || {
     echo -e "${RED}✗ Smoke tests failed on new revision${NC}"
     echo -e "${RED}Deployment stopped. New revision has 0% traffic.${NC}"
     echo -e "${YELLOW}To rollback: Delete the revision or leave it with 0% traffic${NC}"
@@ -150,9 +146,8 @@ fi
 
 # Step 6: Gradual traffic migration
 echo -e "${YELLOW}[6/7]${NC} Starting traffic migration..."
-
-# 10% canary
 echo -e "${BLUE}→ Migrating 100% traffic to new revision...${NC}"
+
 gcloud run services update-traffic $SERVICE_NAME \
   --region=$REGION \
   --project=$PROJECT_ID \
@@ -180,11 +175,10 @@ else
 fi
 echo ""
 
-
 # Step 7: Final verification
 if [ "$SKIP_SMOKE_TESTS" = false ]; then
   echo -e "${YELLOW}[7/7]${NC} Running final smoke tests on production..."
-  PLAYWRIGHT_TEST_BASE_URL=$PROD_URL npm run test:deployment --  --project=chromium --reporter=list || {
+  PLAYWRIGHT_TEST_BASE_URL=$PROD_URL npm run test:deployment -- --project=chromium --reporter=list || {
     echo -e "${RED}✗ Final smoke tests failed${NC}"
     echo -e "${YELLOW}Consider rolling back!${NC}"
     exit 1
@@ -199,23 +193,22 @@ fi
 echo -e "${YELLOW}Trimming old Cloud Run revisions...${NC}"
 # Lists all revisions ordered by creation time, skips the top 1, and deletes the rest
 gcloud run revisions list \
-    --service=$SERVICE_NAME \
-    --region=$REGION \
-    --format="value(name)" \
-    --sort-by="~metadata.creationTimestamp" | tail -n +2 | while read -r OLD_REV; do
-        if [ ! -z "$OLD_REV" ]; then
-            echo "Deleting old revision: $OLD_REV"
-            gcloud run revisions delete $OLD_REV --region=$REGION --quiet || true
-        fi
+  --service=$SERVICE_NAME \
+  --region=$REGION \
+  --format="value(name)" \
+  --sort-by="~metadata.creationTimestamp" | tail -n +2 | while read -r OLD_REV; do
+    if [ ! -z "$OLD_REV" ]; then
+        echo "Deleting old revision: $OLD_REV"
+        gcloud run revisions delete $OLD_REV --region=$REGION --quiet || true
+    fi
 done
+
 echo -e "${GREEN}✓ Revision cleanup complete. Current Cloud Run revisions:${NC}"
-
 gcloud run revisions list \
-    --service=$SERVICE_NAME \
-    --region=$REGION \
-    --format="value(name)" \
-    --sort-by="~metadata.creationTimestamp"
-
+  --service=$SERVICE_NAME \
+  --region=$REGION \
+  --format="value(name)" \
+  --sort-by="~metadata.creationTimestamp"
 echo ""
 echo ""
 

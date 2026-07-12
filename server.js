@@ -76,15 +76,20 @@ const generalLimiter = rateLimit({
 });
 app.use(generalLimiter);
 
-// Ensure dynamic endpoints are never cached by intermediaries.
+// Ensure dynamic endpoints AND the root HTML pages are never cached by intermediaries
 app.use((req, res, next) => {
-	if (req.path === "/health" || req.path.startsWith("/api/")) {
-		res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
-		res.setHeader("Pragma", "no-cache");
-		res.setHeader("Expires", "0");
-	}
-	next();
+  if (
+    req.path === "/" || 
+    req.path === "/health" || 
+    req.path.startsWith("/api/")
+  ) {
+    res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+    res.setHeader("Pragma", "no-cache");
+    res.setHeader("Expires", "0");
+  }
+  next();
 });
+
 
 // Health check endpoint for Cloud Run
 app.get("/health", (req, res) => {
@@ -193,18 +198,17 @@ app.post("/api/contact", apiLimiter, async (req, res) => {
 	}
 });
 
-// Serve static assets from build/client
+// Serve static assets from build/client with robust immutable path checking
 app.use(
-	express.static(path.join(__dirname, "build", "client"), {
-		maxAge: "1y",
-		immutable: true,
-		setHeaders: (res, filePath) => {
-			// Set caching headers for hashed assets
-			if (filePath.includes("/assets/")) {
-				res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
-			}
-		},
-	}),
+  express.static(path.join(__dirname, "build", "client"), {
+    maxAge: "1y",
+    immutable: true,
+    setHeaders: (res, filePath) => {
+      if (filePath.match(/\.(js|css|webp|png|jpg|jpeg|gif|ico|woff|woff2)$/)) {
+        res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+      }
+    },
+  }),
 );
 
 // Serve public files
