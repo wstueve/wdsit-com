@@ -19,6 +19,7 @@ REGION="us-central1"
 SERVICE_NAME="svc-wdsit-com"
 SKIP_TESTS=true
 SKIP_SMOKE_TESTS=false
+PROD_URL="https://wdsit.com"
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
@@ -109,8 +110,10 @@ NEW_REVISION=$(gcloud run revisions list \
   --format="value(name)" \
   --limit=1)
 
+PROJECT_NUMBER=$(gcloud projects describe $PROJECT_ID --format="value(projectNumber)")
+
 # Get the preview URL for the tagged revision
-PREVIEW_URL="https://sha-$COMMIT_SHA---$SERVICE_NAME-725637022868.$REGION.run.app"
+PREVIEW_URL="https://sha-$COMMIT_SHA---$SERVICE_NAME-$PROJECT_NUMBER.$REGION.run.app"
 
 echo -e "${GREEN}✓ New revision deployed: $NEW_REVISION${NC}"
 echo -e "${BLUE}Preview URL: $PREVIEW_URL${NC}"
@@ -181,7 +184,7 @@ echo ""
 # Step 7: Final verification
 if [ "$SKIP_SMOKE_TESTS" = false ]; then
   echo -e "${YELLOW}[7/7]${NC} Running final smoke tests on production..."
-  PLAYWRIGHT_TEST_BASE_URL=https://wdsit.com npm run test:deployment --  --project=chromium --reporter=list || {
+  PLAYWRIGHT_TEST_BASE_URL=$PROD_URL npm run test:deployment --  --project=chromium --reporter=list || {
     echo -e "${RED}✗ Final smoke tests failed${NC}"
     echo -e "${YELLOW}Consider rolling back!${NC}"
     exit 1
@@ -225,7 +228,7 @@ echo -e "Service:  ${BLUE}$SERVICE_NAME${NC}"
 echo -e "Revision: ${BLUE}$NEW_REVISION${NC}"
 echo -e "Region:   ${BLUE}$REGION${NC}"
 echo -e "Traffic:  ${GREEN}100%${NC}"
-echo -e "URL:      ${BLUE}https://wdsit.com${NC}"
+echo -e "URL:      ${BLUE}$PROD_URL${NC}"
 echo ""
 echo -e "${YELLOW}Tip: Monitor logs with:${NC}"
 echo -e "gcloud logs read --limit=50 --resource-type=cloud_run_revision --filter=\"resource.labels.revision_name=$NEW_REVISION\""
