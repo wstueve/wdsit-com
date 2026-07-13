@@ -95,21 +95,13 @@ if [ "$SKIP_BUILD" = false ]; then
     --project=$PROJECT_ID \
     --tag="sha-$COMMIT_SHA" \
     --no-traffic \
+    --min-instances=0 \
+    --cpu-throttling \
     --quiet || {
       echo -e "${RED}✗ Deployment failed${NC}"
       exit 1
-      gcloud run services update $SERVICE_NAME \
-        --region=$REGION \
-        --min-instances=0 \
-        --cpu-throttling \
-        --liveness-probe-type=http \
-        --liveness-probe-path=/health \
-        --liveness-probe-initial-delay=0s \
-        --liveness-probe-period=30s \
-        --liveness-probe-timeout=3s \
-        --liveness-probe-failure-threshold=3
   }
-
+    
   gcloud run services update-traffic "$SERVICE_NAME" \
     --set-tags=preview=LATEST \
     --region="$REGION" \
