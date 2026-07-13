@@ -19,6 +19,7 @@ SERVICE_NAME="svc-wdsit-com"
 SKIP_TESTS=true
 SKIP_SMOKE_TESTS=false
 PROD_URL="https://wdsit.com"
+SKIP_BUILD=false
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
@@ -27,9 +28,13 @@ while [[ $# -gt 0 ]]; do
       SKIP_TESTS=true
       shift
       ;;
+    --skip-build)
+      SKIP_BUILD=true
+      shift
+      ;;
     *)
       echo "Unknown option: $1"
-      echo "Usage: $0 [--skip-tests]"
+      echo "Usage: $0 [--skip-tests] [--skip-build]"
       exit 1
       ;;
   esac
@@ -66,40 +71,53 @@ else
 fi
 
 # Step 2: Build the application
-echo -e "${YELLOW}[2/7]${NC} Building application..."
-npm run build || {
-    echo -e "${RED}✗ Build failed${NC}"
-    exit 1
-}
-echo -e "${GREEN}✓ Build successful${NC}"
-echo ""
+if [ "$SKIP_BUILD" = false ]; then
+  echo -e "${YELLOW}[2/7]${NC} Building application..."
+  npm run build || {
+      echo -e "${RED}✗ Build failed${NC}"
+      exit 1
+  }
+  echo -e "${GREEN}✓ Build successful${NC}"
+  echo ""
+else
+  echo -e "${YELLOW}[2/7]${NC} Skipping build step (--skip-build flag provided)"
+  echo ""
+fi
 
 # Step 3: Deploy new revision with no traffic
-echo -e "${YELLOW}[3/7]${NC} Deploying new revision to Cloud Run (no traffic)..."
 COMMIT_SHA=$(git rev-parse --short HEAD 2>/dev/null || echo "local")
 
-gcloud run deploy $SERVICE_NAME \
-  --source="$APP_ROOT_DIR" \
-  --region=$REGION \
-  --project=$PROJECT_ID \
-  --tag="sha-$COMMIT_SHA" \
-  --no-traffic \
-  --quiet || {
-    echo -e "${RED}✗ Deployment failed${NC}"
-    exit 1
-    gcloud run services update $SERVICE_NAME \
-      --region=$REGION \
-      --min-instances=0 \
-      --cpu-throttling \
-      --liveness-probe-type=http \
-      --liveness-probe-path=/health \
-      --liveness-probe-initial-delay=0s \
-      --liveness-probe-period=30s \
-      --liveness-probe-timeout=3s \
-      --liveness-probe-failure-threshold=3
-}
+if [ "$SKIP_BUILD" = false ]; then
+  echo -e "${YELLOW}[3/7]${NC} Deploying new revision to Cloud Run (no traffic)..."
+  gcloud run deploy $SERVICE_NAME \
+    --source="$APP_ROOT_DIR" \
+    --region=$REGION \
+    --project=$PROJECT_ID \
+    --tag="sha-$COMMIT_SHA" \
+    --no-traffic \
+    --quiet || {
+      echo -e "${RED}✗ Deployment failed${NC}"
+      exit 1
+      gcloud run services update $SERVICE_NAME \
+        --region=$REGION \
+        --min-instances=0 \
+        --cpu-throttling \
+        --liveness-probe-type=http \
+        --liveness-probe-path=/health \
+        --liveness-probe-initial-delay=0s \
+        --liveness-probe-period=30s \
+        --liveness-probe-timeout=3s \
+        --liveness-probe-failure-threshold=3
+  }
 
-# Get the new revision name
+  gcloud run services update-traffic "$SERVICE_NAME" \
+    --set-tags=preview=LATEST \
+    --region="$REGION" \
+    --quiet
+else
+  echo -e "${YELLOW}[3/7]${NC} Skipping deployment. Reusing existing latest revision..."
+fi
+
 NEW_REVISION=$(gcloud run revisions list \
   --service=$SERVICE_NAME \
   --region=$REGION \
@@ -107,31 +125,38 @@ NEW_REVISION=$(gcloud run revisions list \
   --format="value(name)" \
   --limit=1)
 
-PREVIEW_URL=$(gcloud run services describe $SERVICE_NAME \
-  --region=$REGION \
-  --project=$PROJECT_ID \
-  --format="value(status.traffic[?(@.tag=='sha-$COMMIT_SHA')].url)")
+# Run this if the following command fails to get the preview tag correctly
+# gcloud run services update-traffic "$SERVICE_NAME" \
+#   --set-tags=preview=LATEST \
+#   --region="$REGION" \
+#   --quiet
+
+PREVIEW_URL=$(gcloud run services describe "$SERVICE_NAME" \
+  --region="$REGION" \
+  --format="value(status.traffic.url)")
 
 
-echo -e "${GREEN}✓ New revision deployed: $NEW_REVISION${NC}"
+if [ "$SKIP_BUILD" = false ]; then
+  # Wait for revision to be ready
+  echo -e "${YELLOW}[4/7]${NC} Waiting for revision to be ready..."
+  # WARM UP RUN: Hit the preview endpoint once to force a container build/spin-up
+  echo "Warming up container instance from cold start..."
+  curl -s -o /dev/null -w "%{http_code}" "$PREVIEW_URL" || true
+
+  # Give the container a safe structural window to finish initializing
+  sleep 11
+  echo -e "${GREEN}✓ Revision ready${NC}"
+  echo ""
+fi
+
+echo -e "${GREEN}✓ Target revision located: $NEW_REVISION${NC}"
 echo -e "${BLUE}Preview URL: $PREVIEW_URL${NC}"
-echo ""
-
-# Step 4: Wait for revision to be ready
-echo -e "${YELLOW}[4/7]${NC} Waiting for revision to be ready..."
-# WARM UP RUN: Hit the preview endpoint once to force a container build/spin-up
-echo "Warming up container instance from cold start..."
-curl -s -o /dev/null -w "%{http_code}" "$PREVIEW_URL" || true
-
-# Give the container a safe structural window to finish initializing
-sleep 11
-echo -e "${GREEN}✓ Revision ready${NC}"
 echo ""
 
 # Step 5: Run smoke tests against the new revision (0% traffic)
 if [ "$SKIP_SMOKE_TESTS" = false ]; then
   echo -e "${YELLOW}[5/7]${NC} Running smoke tests against new revision..."
-  PLAYWRIGHT_TEST_BASE_URL=$PREVIEW_URL npm run test:deployment -- --project=chromium --reporter=list || {
+  PLAYWRIGHT_TEST_BASE_URL="$PREVIEW_URL" npm run test:deployment -- --project=chromium --reporter=list || {
     echo -e "${RED}✗ Smoke tests failed on new revision${NC}"
     echo -e "${RED}Deployment stopped. New revision has 0% traffic.${NC}"
     echo -e "${YELLOW}To rollback: Delete the revision or leave it with 0% traffic${NC}"

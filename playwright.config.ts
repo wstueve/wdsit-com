@@ -70,8 +70,8 @@ export default defineConfig({
     },
   ],
 
-  /* Run your local dev server before starting the tests */
-  // FIXED: Completely bypass spawning a local webserver if we are testing a deployed URL
+  /* Run your local dev server before starting the tests 
+   * Completely bypass spawning a local webserver if we are testing a deployed URL */
   webServer: isDeploymentTest ? undefined : {
     command: "npm run dev",
     url: "http://localhost:5173",
