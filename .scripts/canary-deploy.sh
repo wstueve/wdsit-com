@@ -107,11 +107,11 @@ NEW_REVISION=$(gcloud run revisions list \
   --format="value(name)" \
   --limit=1)
 
-# Get the preview URL for the tagged revision
 PREVIEW_URL=$(gcloud run services describe $SERVICE_NAME \
   --region=$REGION \
   --project=$PROJECT_ID \
-  --format="value(status.traffic.where(tag=sha-$COMMIT_SHA).url)")
+  --format="value(status.traffic[?(@.tag=='sha-$COMMIT_SHA')].url)")
+
 
 echo -e "${GREEN}✓ New revision deployed: $NEW_REVISION${NC}"
 echo -e "${BLUE}Preview URL: $PREVIEW_URL${NC}"

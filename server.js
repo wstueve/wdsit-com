@@ -17,8 +17,8 @@ const resend = process.env.RESEND_API_KEY
 	? new Resend(process.env.RESEND_API_KEY)
 	: null;
 
-// Trust proxy for Cloud Run (must be set before rate limiter)
-app.set("trust proxy", true);
+// Trust exactly 2 proxy layers (Cloudflare Edge Proxy + Google Front End Infrastructure)
+app.set("trust proxy", 2);
 
 // Security headers via helmet
 app.use(
@@ -61,7 +61,7 @@ app.use(express.urlencoded({ extended: true, limit: "10kb" }));
 // Rate limiting for API endpoints
 const apiLimiter = rateLimit({
 	windowMs: 15 * 60 * 1000, // 15 minutes
-	max: 10, // limit each IP to 10 requests per window
+	max: 5, // limit each IP to 5 requests per window
 	standardHeaders: true,
 	legacyHeaders: false,
 	message: { error: "Too many requests, please try again later." },
