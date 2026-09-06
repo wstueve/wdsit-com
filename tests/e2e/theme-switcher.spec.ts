@@ -1,5 +1,20 @@
 import { test, expect, type Page } from '@playwright/test';
 
+async function openMobileMenu(page: Page) {
+  const menuButton = page.getByTestId('mobile-menu-button');
+  const menu = page.getByTestId('mobile-menu');
+
+  await expect(menuButton).toBeVisible();
+  await menuButton.click();
+
+  // In fast parallel runs, hydration can race the first click. Retry once if needed.
+  if (!(await menu.isVisible())) {
+    await menuButton.click();
+  }
+
+  await expect(menu).toBeVisible();
+}
+
 test.describe('Theme Switcher', () => {
   test.beforeEach(async ({ page }) => {
     // Clear localStorage before each test
@@ -8,6 +23,8 @@ test.describe('Theme Switcher', () => {
   });
 
   test.describe('Desktop Theme Switcher', () => {
+    test.describe.configure({ mode: 'serial' });
+
     test('should display all four theme buttons on desktop', async ({ page }) => {
       await page.setViewportSize({ width: 1280, height: 720 });
       await page.goto('/');
@@ -114,7 +131,7 @@ test.describe('Theme Switcher', () => {
       await expect(page.getByTestId('desktop-theme-toggle')).not.toBeVisible();
 
       // Open hamburger menu
-      await page.getByTestId('mobile-menu-button').click();
+      await openMobileMenu(page);
 
       // Mobile theme switcher should be visible
       const mobileSwitcher = page.getByTestId('mobile-theme-toggle');
@@ -125,7 +142,7 @@ test.describe('Theme Switcher', () => {
       await page.setViewportSize({ width: 375, height: 667 });
       await page.goto('/');
 
-      await page.getByTestId('mobile-menu-button').click();
+      await openMobileMenu(page);
 
       const toggle = page.getByTestId('mobile-theme-toggle-toggle');
       await expect(toggle).toBeVisible();
@@ -136,8 +153,10 @@ test.describe('Theme Switcher', () => {
       await page.setViewportSize({ width: 375, height: 667 });
       await page.goto('/');
 
-      await page.getByTestId('mobile-menu-button').click();
-      await page.getByTestId('mobile-theme-toggle-toggle').click();
+      await openMobileMenu(page);
+      const toggle = page.getByTestId('mobile-theme-toggle-toggle');
+      await expect(toggle).toBeVisible();
+      await toggle.click();
 
       // Check all options are visible
       await expect(page.getByTestId('mobile-theme-toggle-light')).toBeVisible();
@@ -150,8 +169,10 @@ test.describe('Theme Switcher', () => {
       await page.setViewportSize({ width: 375, height: 667 });
       await page.goto('/');
 
-      await page.getByTestId('mobile-menu-button').click();
-      await page.getByTestId('mobile-theme-toggle-toggle').click();
+      await openMobileMenu(page);
+      const toggle = page.getByTestId('mobile-theme-toggle-toggle');
+      await expect(toggle).toBeVisible();
+      await toggle.click();
 
       // Select a theme
       await page.getByTestId('mobile-theme-toggle-dark').click();
@@ -164,8 +185,10 @@ test.describe('Theme Switcher', () => {
       await page.setViewportSize({ width: 375, height: 667 });
       await page.goto('/');
 
-      await page.getByTestId('mobile-menu-button').click();
-      await page.getByTestId('mobile-theme-toggle-toggle').click();
+      await openMobileMenu(page);
+      const toggle = page.getByTestId('mobile-theme-toggle-toggle');
+      await expect(toggle).toBeVisible();
+      await toggle.click();
       await page.getByTestId('mobile-theme-toggle-light').click();
 
       const html = page.locator('html');
@@ -179,8 +202,10 @@ test.describe('Theme Switcher', () => {
       await page.setViewportSize({ width: 375, height: 667 });
       await page.goto('/');
 
-      await page.getByTestId('mobile-menu-button').click();
-      await page.getByTestId('mobile-theme-toggle-toggle').click();
+      await openMobileMenu(page);
+      const toggle = page.getByTestId('mobile-theme-toggle-toggle');
+      await expect(toggle).toBeVisible();
+      await toggle.click();
 
       // Each button should have text label
       await expect(page.getByTestId('mobile-theme-toggle-light')).toContainText('Light');
@@ -191,6 +216,8 @@ test.describe('Theme Switcher', () => {
   });
 
   test.describe('Theme Persistence', () => {
+    test.describe.configure({ mode: 'serial' });
+
     test('should persist theme across page reloads', async ({ page }) => {
       await page.goto('/');
       await page.setViewportSize({ width: 1280, height: 720 });
@@ -281,7 +308,7 @@ test.describe('Theme Switcher', () => {
       await page.setViewportSize({ width: 375, height: 667 });
       await page.goto('/');
 
-      await page.getByTestId('mobile-menu-button').click();
+      await openMobileMenu(page);
       const toggle = page.getByTestId('mobile-theme-toggle-toggle');
 
       await expect(toggle).toHaveAttribute('aria-expanded', 'false');
@@ -324,6 +351,8 @@ test.describe('Theme Switcher', () => {
   });
 
   test.describe('High Contrast Theme', () => {
+    test.describe.configure({ mode: 'serial' });
+
     test('should apply bolder fonts in high contrast mode', async ({ page }) => {
       await page.setViewportSize({ width: 1280, height: 720 });
       await page.goto('/');

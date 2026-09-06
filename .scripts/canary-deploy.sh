@@ -1,7 +1,7 @@
 #!/bin/bash
 # Canary Deployment Script for Cloud Run
 # Tests new revision before gradually migrating traffic
-# Usage: ./scripts/canary-deploy.sh [--skip-tests]
+# Usage: ./scripts/canary-deploy.sh [--no-skip-tests] [--skip-build] [--skip-install]
 
 set -e
 
@@ -20,21 +20,26 @@ SKIP_TESTS=true
 SKIP_SMOKE_TESTS=false
 PROD_URL="https://wdsit.com"
 SKIP_BUILD=false
+SKIP_INSTALL=false
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
   case $1 in
-    --skip-tests)
-      SKIP_TESTS=true
+    --no-skip-tests)
+      SKIP_TESTS=false
       shift
       ;;
     --skip-build)
       SKIP_BUILD=true
       shift
       ;;
+    --skip-install)
+      SKIP_INSTALL=true
+      shift
+      ;;
     *)
       echo "Unknown option: $1"
-      echo "Usage: $0 [--skip-tests] [--skip-build]"
+      echo "Usage: $0 [--no-skip-tests] [--skip-build] [--skip-install]"
       exit 1
       ;;
   esac
@@ -51,14 +56,32 @@ source "$SCRIPT_DIR/env.sh"
 APP_ROOT_DIR="$(dirname "$SCRIPT_DIR")"
 # ═══════════════════════════════════════════════
 
+# Ensure npm/gcloud commands run from the application root regardless of where the script is launched.
+pushd "$APP_ROOT_DIR" > /dev/null
+trap 'popd > /dev/null' EXIT
+
 echo -e "${BLUE}═══════════════════════════════════════════════${NC}"
 echo -e "${BLUE}  Canary Deployment to Cloud Run${NC}"
 echo -e "${BLUE}═══════════════════════════════════════════════${NC}"
 echo ""
 
-# Step 1: Run local tests first
+# Step 1: Install dependencies
+if [ "$SKIP_INSTALL" = false ]; then
+  echo -e "${YELLOW}[1/8]${NC} Installing dependencies (npm ci)..."
+  npm ci || {
+    echo -e "${RED}✗ Dependency installation failed${NC}"
+    exit 1
+  }
+  echo -e "${GREEN}✓ Dependencies installed${NC}"
+  echo ""
+else
+  echo -e "${YELLOW}[1/8]${NC} Skipping dependency install (--skip-install flag provided)"
+  echo ""
+fi
+
+# Step 2: Run local tests first
 if [ "$SKIP_TESTS" = false ]; then
-  echo -e "${YELLOW}[1/7]${NC} Running Playwright tests locally..."
+  echo -e "${YELLOW}[2/8]${NC} Running Playwright tests locally..."
   npm run test -- --reporter=list || {
     echo -e "${RED}✗ Tests failed locally. Fix issues before deploying.${NC}"
     exit 1
@@ -66,13 +89,13 @@ if [ "$SKIP_TESTS" = false ]; then
   echo -e "${GREEN}✓ Local tests passed${NC}"
   echo ""
 else
-  echo -e "${YELLOW}[1/7]${NC} Skipping tests (--skip-tests flag provided)"
+  echo -e "${YELLOW}[2/8]${NC} Skipping tests (--skip-tests flag provided)"
   echo ""
 fi
 
-# Step 2: Build the application
+# Step 3: Build the application
 if [ "$SKIP_BUILD" = false ]; then
-  echo -e "${YELLOW}[2/7]${NC} Building application..."
+  echo -e "${YELLOW}[3/8]${NC} Building application..."
   npm run build || {
       echo -e "${RED}✗ Build failed${NC}"
       exit 1
@@ -80,15 +103,15 @@ if [ "$SKIP_BUILD" = false ]; then
   echo -e "${GREEN}✓ Build successful${NC}"
   echo ""
 else
-  echo -e "${YELLOW}[2/7]${NC} Skipping build step (--skip-build flag provided)"
+  echo -e "${YELLOW}[3/8]${NC} Skipping build step (--skip-build flag provided)"
   echo ""
 fi
 
-# Step 3: Deploy new revision with no traffic
+# Step 4: Deploy new revision with no traffic
 COMMIT_SHA=$(git rev-parse --short HEAD 2>/dev/null || echo "local")
 
 if [ "$SKIP_BUILD" = false ]; then
-  echo -e "${YELLOW}[3/7]${NC} Deploying new revision to Cloud Run (no traffic)..."
+  echo -e "${YELLOW}[4/8]${NC} Deploying new revision to Cloud Run (no traffic)..."
   gcloud run deploy $SERVICE_NAME \
     --source="$APP_ROOT_DIR" \
     --region=$REGION \
@@ -107,7 +130,7 @@ if [ "$SKIP_BUILD" = false ]; then
     --region="$REGION" \
     --quiet
 else
-  echo -e "${YELLOW}[3/7]${NC} Skipping deployment. Reusing existing latest revision..."
+  echo -e "${YELLOW}[4/8]${NC} Skipping deployment. Reusing existing latest revision..."
 fi
 
 NEW_REVISION=$(gcloud run revisions list \
@@ -130,7 +153,7 @@ PREVIEW_URL=$(gcloud run services describe "$SERVICE_NAME" \
 
 if [ "$SKIP_BUILD" = false ]; then
   # Wait for revision to be ready
-  echo -e "${YELLOW}[4/7]${NC} Waiting for revision to be ready..."
+  echo -e "${YELLOW}[5/8]${NC} Waiting for revision to be ready..."
   # WARM UP RUN: Hit the preview endpoint once to force a container build/spin-up
   echo "Warming up container instance from cold start..."
   curl -s -o /dev/null -w "%{http_code}" "$PREVIEW_URL" || true
@@ -145,9 +168,9 @@ echo -e "${GREEN}✓ Target revision located: $NEW_REVISION${NC}"
 echo -e "${BLUE}Preview URL: $PREVIEW_URL${NC}"
 echo ""
 
-# Step 5: Run smoke tests against the new revision (0% traffic)
+# Step 6: Run smoke tests against the new revision (0% traffic)
 if [ "$SKIP_SMOKE_TESTS" = false ]; then
-  echo -e "${YELLOW}[5/7]${NC} Running smoke tests against new revision..."
+  echo -e "${YELLOW}[6/8]${NC} Running smoke tests against new revision..."
   PLAYWRIGHT_TEST_BASE_URL="$PREVIEW_URL" npm run test:deployment -- --project=chromium --reporter=list || {
     echo -e "${RED}✗ Smoke tests failed on new revision${NC}"
     echo -e "${RED}Deployment stopped. New revision has 0% traffic.${NC}"
@@ -157,12 +180,12 @@ if [ "$SKIP_SMOKE_TESTS" = false ]; then
   echo -e "${GREEN}✓ Smoke tests passed on new revision${NC}"
   echo ""
 else
-  echo -e "${YELLOW}[5/7]${NC} Skipping smoke tests (--skip-tests flag provided)"
+  echo -e "${YELLOW}[6/8]${NC} Skipping smoke tests (--no-skip-tests flag not provided)"
   echo ""
 fi
 
-# Step 6: Gradual traffic migration
-echo -e "${YELLOW}[6/7]${NC} Starting traffic migration..."
+# Step 7: Gradual traffic migration
+echo -e "${YELLOW}[7/8]${NC} Starting traffic migration..."
 echo -e "${BLUE}→ Migrating 100% traffic to new revision...${NC}"
 
 gcloud run services update-traffic $SERVICE_NAME \
@@ -192,9 +215,9 @@ else
 fi
 echo ""
 
-# Step 7: Final verification
+# Step 8: Final verification
 if [ "$SKIP_SMOKE_TESTS" = false ]; then
-  echo -e "${YELLOW}[7/7]${NC} Running final smoke tests on production..."
+  echo -e "${YELLOW}[8/8]${NC} Running final smoke tests on production..."
   PLAYWRIGHT_TEST_BASE_URL=$PROD_URL npm run test:deployment -- --project=chromium --reporter=list || {
     echo -e "${RED}✗ Final smoke tests failed${NC}"
     echo -e "${YELLOW}Consider rolling back!${NC}"
@@ -203,7 +226,7 @@ if [ "$SKIP_SMOKE_TESTS" = false ]; then
   echo -e "${GREEN}✓ Final smoke tests passed${NC}"
   echo ""
 else
-  echo -e "${YELLOW}[7/7]${NC} Skipping final smoke tests (--skip-tests flag provided)"
+  echo -e "${YELLOW}[8/8]${NC} Skipping final smoke tests (--skip-tests flag provided)"
   echo ""
 fi
 
