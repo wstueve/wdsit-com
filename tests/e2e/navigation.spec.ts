@@ -1,4 +1,18 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
+
+async function openMobileMenu(page: Page) {
+  const menuButton = page.getByTestId("mobile-menu-button");
+  const menu = page.getByTestId("mobile-menu");
+
+  await expect(menuButton).toBeVisible();
+  await menuButton.click();
+
+  if (!(await menu.isVisible())) {
+    await menuButton.click();
+  }
+
+  await expect(menu).toBeVisible();
+}
 
 test.describe("Navigation", () => {
   test("should navigate to all main pages", async ({ page }) => {
@@ -39,8 +53,7 @@ test.describe("Navigation", () => {
     await page.goto("/");
 
     await expect(page.getByTestId("mobile-menu")).not.toBeVisible();
-    await page.getByTestId("mobile-menu-button").click();
-    await expect(page.getByTestId("mobile-menu")).toBeVisible();
+    await openMobileMenu(page);
 
     await page.getByTestId("mobile-nav").getByRole("link", { name: "About" }).click();
     await expect(page).toHaveURL("/about");

@@ -179,7 +179,8 @@ body {
 
 [data-theme="high-contrast"] body {
   @apply bg-white text-black font-bold;
-  font-size: 1.125rem; /* 18px base font size (+2px from 16px) */
+  font-weight: 700;
+  font-size: 1.125rem !important; /* 18px base font size (+2px from 16px) */
 }
 
 [data-theme="high-contrast"] * {
@@ -188,32 +189,38 @@ body {
 
 [data-theme="high-contrast"] h1 {
   @apply font-extrabold;
-  font-size: 3.25rem; /* 52px (+4px) */
+  font-weight: 800;
+  font-size: 3.25rem !important; /* 52px (+4px) */
 }
 
 [data-theme="high-contrast"] h2 {
   @apply font-extrabold;
-  font-size: 2.5rem; /* 40px (+4px) */
+  font-weight: 800;
+  font-size: 2.5rem !important; /* 40px (+4px) */
 }
 
 [data-theme="high-contrast"] h3 {
   @apply font-extrabold;
-  font-size: 2rem; /* 32px (+2px) */
+  font-weight: 800;
+  font-size: 2rem !important; /* 32px (+2px) */
 }
 
 [data-theme="high-contrast"] h4 {
   @apply font-extrabold;
-  font-size: 1.625rem; /* 26px (+2px) */
+  font-weight: 800;
+  font-size: 1.625rem !important; /* 26px (+2px) */
 }
 
 [data-theme="high-contrast"] h5 {
   @apply font-extrabold;
-  font-size: 1.375rem; /* 22px (+2px) */
+  font-weight: 800;
+  font-size: 1.375rem !important; /* 22px (+2px) */
 }
 
 [data-theme="high-contrast"] h6 {
   @apply font-extrabold;
-  font-size: 1.25rem; /* 20px (+2px) */
+  font-weight: 800;
+  font-size: 1.25rem !important; /* 20px (+2px) */
 }
 
 [data-theme="high-contrast"] button:not(.inline-flex),
