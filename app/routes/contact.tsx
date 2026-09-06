@@ -65,7 +65,7 @@ export default function Contact() {
                 Get in Touch
               </h2>
               <p className="text-gray-600 dark:text-gray-400 mb-8">
-                Whether you have a question about our services, need technical consultation, or want to discuss a custom project, we're here to help.
+                Whether you have a question about our services, need technical consultation, data deletion request, or want to discuss a custom project, we're here to help.
               </p>
 
               <div className="space-y-6">
