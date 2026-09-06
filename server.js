@@ -227,8 +227,7 @@ const viteDevServer =
 if (viteDevServer) {
 	app.use(viteDevServer.middlewares);
 } else {
-	app.all(
-		"*",
+	app.use(
 		createRequestHandler({
 			build: () => import("./build/server/index.js"),
 		}),
