@@ -1,12 +1,12 @@
 # Plan: AI training for non-technical people
 
-Use this file to finish the repositioning. Do not start the site rewrite until the open decisions in the last section are filled in. Recommended defaults are marked so we can move if an answer does not arrive.
+Use this file to finish the repositioning. Price and the paid-enrollment goal are decided. The remaining defaults in Decisions are safe to build from if you do not change them.
 
 ## Goal
 
 Turn the public site from a Shopify plugin brochure into a training business. The business teaches people who do not write code how to use AI in their real work.
 
-Visitors should be able to read a concrete course, decide it is for them, and sign up. Signing up is for two things:
+Visitors should be able to read a concrete course, decide it is for them, and pay for a seat. Payment is for two things:
 
 1. A protected class (lessons, exercises, and a prompt library that are not on the public site).
 2. One-on-one instruction tied to the student's actual job.
@@ -48,7 +48,26 @@ What a student gets:
 - A small prompt library and checklists.
 - Two private sessions: one to choose a workflow, one to review the capstone.
 
-Public pages sell the outcome and show the week titles. The lesson steps, worked examples, worksheets, and prompt library stay behind the class login.
+Public pages sell the outcome, show the week titles, and show the price. The lesson steps, worked examples, worksheets, and prompt library stay behind the class login.
+
+The instructor has used AI in their own work for more than six years. Publish that. Do not add a job title, employer, or certification unless you send the wording.
+
+## Price
+
+**$1,200** for a seat, paid before access. **$997** for the first eight seats, then the price goes to $1,200. Both numbers are above the $500 floor. The founding price is the public number until those eight seats are gone. Do not also advertise a second "compare at" price in a way that looks like a fake discount. Say the first eight seats are $997, and the price after that is $1,200.
+
+Why this band:
+
+- Maven's pricing guide (September 2, 2026) puts live cohort courses at $800–$2,450. A course with 6–8 live hours and at least one project is $800–$1,200. One with 8–12 live hours, several projects or a capstone, and supporting material is $1,200–$1,800. The same guide says courses at $950 or higher earn 50–100% more per marketplace landing-page visit than cheaper courses, and that people pay for the instructor's judgment, not for a video library.
+- Nearby offers for non-technical students: a four-session Leland AI program at $1,499, a six-week no-code Maven cohort at $1,250, and a Maven leaders' course that includes 1:1 coaching at $1,350. A self-paced MIT program with no private sessions is $899. A self-paced seat of a UK agent course is £375, against £1,000 for the live cohort.
+- This offer has four applied exercises and a capstone, plus about two hours of private instruction, and it does not yet have a live weekly class or reviews. $1,200 matches the bottom of Maven's "projects plus guidance" band. $997 is a first-cohort price (Maven suggests a modest beta discount when there is no review history), and it stays above the $950 line their data associates with higher revenue per visit.
+- Cold sales pages above $2,000 are a different motion. Published course-pricing roundups put sales-page conversion over $2,000 near 0.1–0.5%, and those sales usually need a call. That is the wrong first step for a site that has to take payment itself.
+
+Optional later, not on the first page: a three-payment plan. If the pay-in-full price stalls, offer three payments that total more than $1,200 (for example three payments of $450). Do not lead with the plan.
+
+Cohort size stays at eight while each student gets two private sessions. Eight seats at $997 is $7,976. The cap is there so the private sessions can actually be delivered.
+
+Sources: [Maven pricing guide](https://help.maven.com/en/articles/6732396-pricing-your-course-workshop-or-self-paced-offering), [Leland AI Builder](https://www.joinleland.com/bootcamps/ai-builder-program-l1), [Maven agentic workflows cohort](https://maven.com/aibuildlab/scale-with-ai-agentic-workflows), [Maven hands-on AI for leaders](https://maven.com/james-gray/hands-on-ai-for-leaders).
 
 ## Course outline
 
@@ -166,9 +185,9 @@ Replace the generic contact pitch. Fields:
 - The task you most want help with
 - Optional note
 
-Submit copy: you are requesting a seat in the next group. We reply by email with how to join the class and book the private sessions. Do not say payment succeeded. The form does not charge anyone yet.
+The page states the price ($997 for the first eight seats, then $1,200) and what it buys: the four weeks, the exercises, the prompt library, and two private sessions. The button takes payment. After a successful charge, the confirmation says the seat is paid and that access plus a booking link for the two sessions arrives by email. It does not say the classroom is already unlocked unless the login exists.
 
-Until a real endpoint exists, keep the current simulated submit, and label that limitation in the implementation notes so we do not imply the signup is stored.
+There is no payment integration in the app today. Phase 1 adds Stripe Checkout (or a Stripe Payment Link if that is faster to run) and a success route. Until that charge succeeds in a test, the button must not look like a completed purchase. The old contact form does not store or send anything. Do not reuse it as a fake checkout.
 
 ### About page
 
@@ -178,13 +197,13 @@ Replace the Shopify story. Teach the point of view: plain language, real work, a
 
 Do not build accounts in the same pass as the marketing copy.
 
-**Phase 1 — public site and enrollment request.** Rewrite Home, About, and the new Course and Enroll pages. Update titles, descriptions, nav, and footer. Update Playwright checks that look for the old Shopify titles. Enrollment stores nothing until you pick a destination for the form.
+**Phase 1 — public site and paid checkout.** Rewrite Home, About, and the new Course and Enroll pages with the price visible. Update titles, descriptions, nav, and footer. Update Playwright checks that look for the old Shopify titles. Add Stripe so Enroll charges $997 while the founding cap is open and $1,200 after that. A paid student gets a confirmation and an email. Booking the two sessions can be a calendar link in that email. The classroom login is not required for the first sale.
 
-**Phase 2 — classroom.** Add a login (magic link is the simplest fit for this audience) and routes under `/classroom` for the four weeks, the worksheets, and the prompt library. A person who is not signed in sees a short explanation and a link to enroll. Lesson text lives in markdown so the class can be edited without a redesign.
+**Phase 2 — classroom.** Add a login (magic link is the simplest fit for this audience) and routes under `/classroom` for the four weeks, the worksheets, and the prompt library. Only a paid email can get in. A person who is not signed in sees a short explanation and a link to enroll. Lesson text lives in markdown so the class can be edited without a redesign.
 
-**Phase 3 — paid seats and scheduling.** Connect enrollment to payment and to a booking link for the two private sessions. Only after price, refund policy, and the calendar tool are chosen.
+**Phase 3 — scheduling inside the product.** Move private-session booking from an emailed link into the classroom. Add a payment plan only if pay-in-full is the reason people drop off.
 
-Phase 1 is the work this plan unlocks next. Phase 2 and 3 stay scoped here so the public copy does not promise a login or a checkout we have not built. The enroll button asks for a seat. It does not say "start the class now."
+Phase 1 is the work this plan unlocks next. The enroll button takes payment. It does not say "start the class now" until phase 2 exists. Refund copy waits until you set a policy. Until then the page says to email support@wds-it.com before enrolling if you need the refund terms, and we do not invent a guarantee.
 
 ## Files phase 1 will touch
 
@@ -211,28 +230,33 @@ README's opening description should match the new business. Deployment and stack
 - Separate "the tool drafted this" from "you decided to send it."
 - Name limits: invented facts, private data, and decisions that stay with a person.
 - Do not claim certification, job placement, income, or that every answer will be correct.
-- Do not name a price, cohort date, or seat count until you set them.
+- The only price on the page is $997 for the first eight seats and $1,200 after that. Do not invent a cohort date.
 
-## Open decisions
+## Decisions
 
-Fill these in before the rewrite. The default is what we will use if you do not choose.
+Confirmed:
 
-1. **Primary student.** Default: any working adult in a non-technical role. A tighter answer (office managers, small-business owners, marketers, teachers) changes week 2 examples and the home page.
-2. **Format.** Default: self-paced lessons plus two scheduled one-on-ones. Say if the class itself is live on a call.
-3. **How one-on-one is sold.** Default: both private sessions are part of the course, not a separate product.
-4. **Price and refunds.** Default: no number on the site in phase 1. Enrollment is a request, and you reply with the price. Do not publish a refund policy until you write one.
-5. **Public name.** Default: keep WDS IT, LLC, and use "Use AI at Work" as the course name on wdsit.com.
-6. **First release.** Default: phase 1 only (public pages and an enrollment request). Classroom login is phase 2.
-7. **Voice and bio.** Default: "we," company voice, no personal bio until you send the facts you want published.
-8. **Tools we may name.** Default: speak about "an AI assistant you already have," and mention ChatGPT, Copilot, and Gemini only as examples, not as requirements.
-9. **Where enrollments go.** Default: leave the form simulated and visible as a request UI. Do not pretend emails are delivered.
+1. **The offer is paid.** People enroll by paying. A request form is not the goal.
+2. **Price.** $997 for the first eight seats, then $1,200. See the Price section for the market comparison. Floor was "over $500."
+3. **Instructor fact we can publish.** More than six years of using AI in real work, with a deep practical understanding. No other bio facts yet.
+
+Still using these unless you change them:
+
+1. **Primary student.** Any working adult in a non-technical role. A tighter answer (office managers, small-business owners, marketers) changes the week 2 examples.
+2. **Format.** Self-paced lessons plus two scheduled one-on-ones. A live weekly class would support a price closer to $1,500, in line with the Leland and Maven cohorts above. It is not required to hold $1,200, because the private sessions are the access people pay for.
+3. **How one-on-one is sold.** Both private sessions are included, not an add-on.
+4. **Public name.** Keep WDS IT, LLC, and use "Use AI at Work" as the course name.
+5. **First release.** Phase 1 is the public pages plus Stripe. The classroom login is phase 2, after the first paid seats.
+6. **Voice.** Company "we" on the marketing pages. The about page may say the instructor has used AI in their work for more than six years. No job title until you write it.
+7. **Tools we may name.** "An AI assistant you already have." ChatGPT, Copilot, and Gemini are examples, not requirements.
+8. **Refunds.** No guarantee on the page until you write the policy. Questions go to support@wds-it.com.
 
 ## Implementation checklist
 
 Use this order once the decisions above are confirmed or the defaults are accepted.
 
-1. Confirm or edit the nine decisions in this file.
-2. Draft Home, Course, About, and Enroll copy into this folder for a read-through before putting it in the routes.
+1. Confirm the remaining defaults in Decisions, or say to proceed with them.
+2. Draft Home, Course, About, and Enroll copy into this folder for a read-through before putting it in the routes. The draft includes the $997 / $1,200 price and a Stripe checkout path.
 3. Implement the routes and navigation.
 4. Point old `/contact` links at `/enroll`.
 5. Update tests that assert Shopify titles or the old nav.
@@ -243,7 +267,8 @@ Use this order once the decisions above are confirmed or the defaults are accept
 ## Progress
 
 - [x] Plan written from the current site
-- [ ] Decisions confirmed
+- [x] Price set from paid-course comparisons: $997 founding, $1,200 after eight seats
+- [ ] Remaining defaults confirmed (audience, self-paced vs live, brand)
 - [ ] Public copy drafted
 - [ ] Phase 1 pages implemented
 - [ ] Tests updated and passing
