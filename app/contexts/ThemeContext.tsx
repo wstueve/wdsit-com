@@ -28,33 +28,24 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
   const [systemPreference, setSystemPreference] = useState<'light' | 'dark'>('light');
   const [mounted, setMounted] = useState(false);
 
-  // Detect system preference
+  // Read the saved theme before we touch the attribute the inline script already set.
   useEffect(() => {
-    setMounted(true);
-    
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     const updateSystemPreference = (e: MediaQueryList | MediaQueryListEvent) => {
       setSystemPreference(e.matches ? 'dark' : 'light');
     };
-    
-    // Set initial value
+
     updateSystemPreference(mediaQuery);
-    
-    // Listen for changes
     mediaQuery.addEventListener('change', updateSystemPreference);
-    
+
+    const stored = localStorage.getItem('theme');
+    if (stored === 'light' || stored === 'dark' || stored === 'high-contrast' || stored === 'auto') {
+      setThemeState(stored);
+    }
+    setMounted(true);
+
     return () => mediaQuery.removeEventListener('change', updateSystemPreference);
   }, []);
-
-  // Load theme from localStorage on mount
-  useEffect(() => {
-    if (!mounted) return;
-    
-    const stored = localStorage.getItem('theme');
-    if (stored && (stored === 'light' || stored === 'dark' || stored === 'high-contrast' || stored === 'auto')) {
-      setThemeState(stored as Theme);
-    }
-  }, [mounted]);
 
   // Calculate resolved theme
   const resolvedTheme: 'light' | 'dark' | 'high-contrast' = 

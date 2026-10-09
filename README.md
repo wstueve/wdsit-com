@@ -1,6 +1,6 @@
-# WDS IT - Shopify Solutions
+# WDS IT - Use AI at Work
 
-Enterprise Shopify plugin development with AI integration and Azure certification. A modern, responsive website built with React Router 7 and deployed on Google Cloud Run with global CDN.
+Practical AI training for people who do not write code, with a paid course and private sessions. A modern, responsive website built with React Router 7 and deployed on Google Cloud Run with global CDN.
 
 ## 🚀 Features
 

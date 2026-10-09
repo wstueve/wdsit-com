@@ -30,14 +30,22 @@ test.describe("Navigation", () => {
     await page.getByRole("link", { name: "About" }).click();
     await expect(page).toHaveURL("/about");
 
-    // Navigate to Contact
+    // Navigate to the course, then enroll
     if (isMobile) {
       await page.getByTestId("mobile-menu-button").click();
-      await page.getByTestId("mobile-nav").getByRole("link", { name: "Contact" }).click();
+      await page.getByTestId("mobile-nav").getByRole("link", { name: "Course" }).click();
     } else {
-      await page.getByTestId("desktop-nav").getByRole("link", { name: "Contact" }).click();
+      await page.getByTestId("desktop-nav").getByRole("link", { name: "Course" }).click();
     }
-    await expect(page).toHaveURL("/contact");
+    await expect(page).toHaveURL("/course");
+
+    if (isMobile) {
+      await page.getByTestId("mobile-menu-button").click();
+      await page.getByTestId("mobile-nav").getByRole("link", { name: "Enroll" }).click();
+    } else {
+      await page.getByTestId("desktop-nav").getByRole("link", { name: "Enroll" }).click();
+    }
+    await expect(page).toHaveURL("/enroll");
 
     // Navigate back to Home via logo
     await page.getByTestId("logo-link").click();

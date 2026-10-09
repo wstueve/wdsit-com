@@ -14,7 +14,7 @@ export function Footer() {
               WDS IT, LLC
             </h3>
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-              Enterprise Shopify Solutions & AI Consulting
+              Practical AI training for people who do not write code
             </p>
             <p className="text-sm text-gray-600 dark:text-gray-400">
               Proudly based in Olathe, Kansas

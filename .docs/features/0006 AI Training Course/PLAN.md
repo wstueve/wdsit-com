@@ -268,7 +268,7 @@ Refund line, used because a $1,000 page converts better when the risk is named: 
 - `tests/e2e/navigation.spec.ts`
 - page titles and meta descriptions
 
-Leave `app/routes/privacy.tsx` and `app/routes/terms.tsx` unchanged in phase 1 except where a title still says "Shopify Apps" and would confuse a reader. Body legal text waits for review.
+Privacy and terms now describe the training business, the enrollment fields, Stripe, and the refund-before-the-first-session rule. They are plain-language pages, not a lawyer's draft.
 
 README's opening description should match the new business. Deployment and stack docs stay as they are.
 
@@ -338,7 +338,8 @@ Use this order once the decisions above are confirmed or the defaults are accept
 - [x] Short bio taken from the resume, with employer names and figures left out
 - [x] Session-only offer added: 2–5 sessions at $375
 - [ ] Remaining defaults confirmed (audience, self-paced vs live, brand)
-- [ ] Public copy drafted
-- [ ] Phase 1 pages implemented
-- [ ] Tests updated and passing
-- [ ] Browser check of the enroll path
+- [x] Public pages implemented: Home, Course, About, Enroll, Privacy, Terms
+- [x] Shopify and plugin wording removed from the public site
+- [x] Chromium tests for navigation, enrollment, accessibility, and theme passing
+- [ ] Stripe keys added so checkout can charge a card
+- [ ] Full browser pass after Stripe is connected

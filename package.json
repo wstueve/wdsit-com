@@ -1,6 +1,6 @@
 {
 	"name": "wdsit-com",
-	"description": "Full-stack React Router 7 SSR application for Shopify plugin business.",
+	"description": "Public site for WDS IT AI training: a paid course and private sessions.",
 	"private": true,
 	"dependencies": {
 		"@react-router/express": "^8.3.1",
@@ -11,7 +11,8 @@
 		"react": "^19.2.7",
 		"react-dom": "^19.2.7",
 		"react-router": "^8.3.1",
-		"resend": "^6.25.0"
+		"resend": "^6.25.0",
+		"stripe": "^23.0.0"
 	},
 	"devDependencies": {
 		"@axe-core/playwright": "^4.13.0",

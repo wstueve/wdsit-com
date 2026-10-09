@@ -12,8 +12,8 @@ test.describe("Accessibility (WCAG 2.1 AA)", () => {
     expect(accessibilityScanResults.violations).toEqual([]);
   });
 
-  test("contact page should not have accessibility violations", async ({ page }) => {
-    await page.goto("/contact");
+  test("enroll page should not have accessibility violations", async ({ page }) => {
+    await page.goto("/enroll");
     
     const accessibilityScanResults = await new AxeBuilder({ page })
       .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
@@ -67,11 +67,11 @@ test.describe("Accessibility (WCAG 2.1 AA)", () => {
   });
 
   test("form inputs should have labels", async ({ page }) => {
-    await page.goto("/contact");
-    
+    await page.goto("/enroll");
+
     await expect(page.getByLabel("Name *")).toBeVisible();
     await expect(page.getByLabel("Email *")).toBeVisible();
-    await expect(page.getByLabel("Subject *")).toBeVisible();
-    await expect(page.getByLabel("Message *")).toBeVisible();
+    await expect(page.getByLabel("Role *")).toBeVisible();
+    await expect(page.getByLabel("The task you most want help with *")).toBeVisible();
   });
 });

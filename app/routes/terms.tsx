@@ -3,10 +3,10 @@ import { Layout } from "~/components/Layout";
 
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "Terms of Service - WDS IT Shopify Apps" },
-    { name: "description", content: "Terms of service for WDS IT Shopify applications and services" },
+    { title: "Terms of Service - WDS IT" },
+    { name: "description", content: "Terms of service for WDS IT, LLC." },
     { property: "og:title", content: "Terms of Service - WDS IT" },
-    { property: "og:description", content: "Terms of service for WDS IT Shopify applications and services" },
+    { property: "og:description", content: "Terms of service for WDS IT, LLC." },
   ];
 }
 
@@ -23,20 +23,18 @@ export default function Terms() {
           <section className="mb-8">
             <h2 className="mb-4">1. Acceptance of Terms</h2>
             <p className="text-gray-700 dark:text-gray-300 mb-4">
-              By accessing or using WDS IT, LLC's ("WDS IT," "we," "our," or "us") Shopify applications and services, you agree to be bound by these Terms of Service ("Terms"). If you do not agree to these Terms, do not use our services.
+              By using this website or buying training from WDS IT, LLC ("WDS IT," "we," "our," or "us"), you agree to these Terms of Service ("Terms"). If you do not agree, do not use the site or enroll.
             </p>
           </section>
 
           <section className="mb-8">
             <h2 className="mb-4">2. Description of Service</h2>
             <p className="text-gray-700 dark:text-gray-300 mb-4">
-              WDS IT provides Shopify applications and related services designed to enhance e-commerce functionality. Our services include but are not limited to:
+              WDS IT is an AI enablement and training company. We teach people who do not write code how to use AI in their work. What we sell is described on the site at the time you pay:
             </p>
             <ul className="list-disc pl-6 text-gray-700 dark:text-gray-300 mb-4 space-y-2">
-              <li>Custom Shopify app development and integration</li>
-              <li>Database optimization and management solutions</li>
-              <li>Enterprise system integrations</li>
-              <li>Technical support and consulting services</li>
+              <li>The Use AI at Work course, including class material and two private sessions</li>
+              <li>Private sessions sold on their own, in a block of 2, 3, 4, or 5</li>
             </ul>
           </section>
 
@@ -44,31 +42,29 @@ export default function Terms() {
             <h2 className="mb-4">3. User Responsibilities</h2>
             <p className="text-gray-700 dark:text-gray-300 mb-4">You agree to:</p>
             <ul className="list-disc pl-6 text-gray-700 dark:text-gray-300 mb-4 space-y-2">
-              <li>Provide accurate and complete information when using our services</li>
-              <li>Maintain the security of your account credentials</li>
-              <li>Use our services in compliance with all applicable laws and regulations</li>
-              <li>Not attempt to reverse engineer, modify, or distribute our applications</li>
-              <li>Not use our services for any fraudulent or harmful purposes</li>
+              <li>Give accurate information when you enroll</li>
+              <li>Use the site and the class material for your own learning</li>
+              <li>Not share, resell, or publish the class material</li>
+              <li>Follow the law, and not use the training to harm someone</li>
             </ul>
           </section>
 
           <section className="mb-8">
             <h2 className="mb-4">4. Payment and Billing</h2>
             <p className="text-gray-700 dark:text-gray-300 mb-4">
-              Payment terms vary by service and are specified at the time of purchase. Generally:
+              The price is shown before you pay. You pay in full at checkout.
             </p>
             <ul className="list-disc pl-6 text-gray-700 dark:text-gray-300 mb-4 space-y-2">
-              <li>Fees are charged in advance for subscription services</li>
-              <li>Custom development projects are billed according to agreed-upon milestones</li>
-              <li>All fees are non-refundable unless otherwise specified</li>
-              <li>We reserve the right to change pricing with reasonable notice</li>
+              <li>Email support@wds-it.com before your first session and we refund the payment</li>
+              <li>After the first session, the sale is final</li>
+              <li>A later price change does not change a payment you already made</li>
             </ul>
           </section>
 
           <section className="mb-8">
             <h2 className="mb-4">5. Intellectual Property</h2>
             <p className="text-gray-700 dark:text-gray-300 mb-4">
-              WDS IT retains all rights, title, and interest in our applications, services, and related intellectual property. You are granted a limited, non-exclusive, non-transferable license to use our services for their intended purpose.
+              We keep ownership of the course material, prompts, and site content. Your payment gives you a personal, non-transferable right to use that material for your own work. It does not let you resell it or teach it as your own course.
             </p>
           </section>
 
@@ -127,7 +123,7 @@ export default function Terms() {
               For questions about these Terms, please contact us:
             </p>
             <div className="bg-white/80 dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700">
-              <p className="text-gray-700 dark:text-gray-300 mb-2"><strong>Email:</strong> <a href="mailto:support@wds-it.com" className="text-primary-600 dark:text-primary-400 hover:underline">support@wds-it.com</a></p>
+              <p className="text-gray-700 dark:text-gray-300 mb-2"><strong>Email:</strong> <a href="mailto:support@wds-it.com" className="text-primary-600 dark:text-primary-400 underline">support@wds-it.com</a></p>
               <p className="text-gray-700 dark:text-gray-300"><strong>Address:</strong> WDS IT, LLC, Olathe, KS</p>
             </div>
           </section>
