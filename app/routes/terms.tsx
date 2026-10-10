@@ -35,6 +35,7 @@ export default function Terms() {
             <ul className="list-disc pl-6 text-gray-700 dark:text-gray-300 mb-4 space-y-2">
               <li>The Use AI at Work course, including class material and two private sessions</li>
               <li>Private sessions sold on their own, in a block of 2, 3, 4, or 5</li>
+              <li>Company training: a team day, or a four-week program, at the prices on the Companies page</li>
             </ul>
           </section>
 

@@ -6,6 +6,7 @@ import {
   BIO,
   COURSE_FOUNDING_CENTS,
   COURSE_REGULAR_CENTS,
+  CASE_STUDIES,
   REFUND,
   SESSION_CENTS,
   WEEKS,
@@ -71,6 +72,11 @@ export default function Home({ loaderData }: Route.ComponentProps) {
                 See the four weeks
               </Link>
             </div>
+            <p className="mt-6">
+              <Link to="/companies" className="text-primary-700 dark:text-primary-300 font-medium underline">
+                Training a company, from $15,000
+              </Link>
+            </p>
           </div>
         </div>
       </section>
@@ -177,6 +183,32 @@ export default function Home({ loaderData }: Route.ComponentProps) {
           <p className="text-lg text-gray-700 dark:text-gray-300 mt-4">
             Wes leads the practice. A private session follows a written agenda, with Wes or a coach trained to that agenda.
           </p>
+        </div>
+      </section>
+
+      <section className="py-16 sm:py-20 bg-gray-900 dark:bg-black text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-3xl mb-10">
+            <h2 className="text-3xl font-bold mb-4">For a whole company</h2>
+            <p className="text-gray-200 text-lg">
+              A team day is $15,000. A four-week program is $30,000. The people in the room do not write code. They practice on their own work and leave with a playbook the company keeps.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+            {CASE_STUDIES.map((study) => (
+              <article key={study.title} className="rounded-xl border border-gray-700 p-6">
+                <p className="text-sm text-primary-300 mb-2">{study.setting}</p>
+                <h3 className="text-xl font-semibold mb-3">{study.title}</h3>
+                <p className="text-gray-300">{study.situation}</p>
+              </article>
+            ))}
+          </div>
+          <p className="text-sm text-gray-300 mb-6">
+            These are from leading this work inside large companies. Names are left off. They are not quotes from a training client.
+          </p>
+          <Link to="/companies" className={primaryLink}>
+            See company training
+          </Link>
         </div>
       </section>
 

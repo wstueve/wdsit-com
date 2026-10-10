@@ -41,6 +41,24 @@ test.describe("Enrollment", () => {
     await expect(page.getByRole("button", { name: /pay \$1,875/i })).toBeVisible();
   });
 
+  test("company training request should not pretend it was sent", async ({ page }) => {
+    await page.goto("/companies");
+
+    await expect(page.getByRole("heading", { name: "Case studies" })).toBeVisible();
+    await expect(page.getByText("A regulated utility")).toBeVisible();
+    await expect(page.getByText("$15,000").first()).toBeVisible();
+    await expect(page.getByText("$30,000").first()).toBeVisible();
+
+    await page.getByLabel("Company *").fill("Northwind");
+    await page.getByLabel("Name *").fill("Ada Lopez");
+    await page.getByLabel("Email *").fill("ada@example.com");
+    await page.getByLabel("Role *").fill("Operations lead");
+    await page.getByLabel("How many people *").fill("18");
+    await page.getByRole("button", { name: /request \$30,000 program/i }).click();
+
+    await expect(page.getByRole("status")).toContainText(/nothing was sent/i);
+  });
+
   test("contact information should be displayed", async ({ page }) => {
     await page.goto("/enroll");
 

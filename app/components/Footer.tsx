@@ -14,7 +14,7 @@ export function Footer() {
               WDS IT, LLC
             </h3>
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-              Practical AI training for people who do not write code
+              AI training for individuals and for companies
             </p>
             <p className="text-sm text-gray-600 dark:text-gray-400">
               Proudly based in Olathe, Kansas

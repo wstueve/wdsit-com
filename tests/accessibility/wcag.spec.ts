@@ -12,6 +12,16 @@ test.describe("Accessibility (WCAG 2.1 AA)", () => {
     expect(accessibilityScanResults.violations).toEqual([]);
   });
 
+  test("companies page should not have accessibility violations", async ({ page }) => {
+    await page.goto("/companies");
+
+    const accessibilityScanResults = await new AxeBuilder({ page })
+      .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
+      .analyze();
+
+    expect(accessibilityScanResults.violations).toEqual([]);
+  });
+
   test("enroll page should not have accessibility violations", async ({ page }) => {
     await page.goto("/enroll");
     

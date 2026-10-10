@@ -11,6 +11,7 @@ test.describe("Deployment Smoke Tests", () => {
       { url: "/", title: /WDS IT/ },
       { url: "/about", title: /About WDS IT/ },
       { url: "/course", title: /Course/ },
+      { url: "/companies", title: /Companies/ },
       { url: "/enroll", title: /Enroll/ },
       { url: "/privacy", title: /Privacy Policy/ },
       { url: "/terms", title: /Terms of Service/ },

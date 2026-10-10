@@ -52,6 +52,13 @@ Public pages sell the outcome, show the week titles, and show the price. The les
 
 There is a second, smaller offer for people who do not want the class: **private sessions only**, in a block of 2, 3, 4, or 5. Same kind of working session. No lessons, no prompt library, no capstone.
 
+There is a company offer on `/companies`:
+
+- **Team day, $15,000.** Prep call, one working day for up to 25 people, a playbook, two weeks of sponsor email.
+- **Company program, $30,000.** The day for up to 40 people, a manager session, a second day, four office hours, and a playbook filled with their examples.
+
+The request form does not charge a card. Case studies on that page are from leading this kind of change inside large companies. Names stay off. They are not quotes from a training client and they are not a promised result.
+
 ### What we say about skill
 
 Publish this, and nothing more specific:

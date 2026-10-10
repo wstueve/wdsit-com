@@ -41,6 +41,14 @@ test.describe("Navigation", () => {
 
     if (isMobile) {
       await page.getByTestId("mobile-menu-button").click();
+      await page.getByTestId("mobile-nav").getByRole("link", { name: "Companies" }).click();
+    } else {
+      await page.getByTestId("desktop-nav").getByRole("link", { name: "Companies" }).click();
+    }
+    await expect(page).toHaveURL("/companies");
+
+    if (isMobile) {
+      await page.getByTestId("mobile-menu-button").click();
       await page.getByTestId("mobile-nav").getByRole("link", { name: "Enroll" }).click();
     } else {
       await page.getByTestId("desktop-nav").getByRole("link", { name: "Enroll" }).click();
