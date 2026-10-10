@@ -8,8 +8,10 @@ interface NavigationProps {
 export function Navigation({ mobile = false, onLinkClick }: NavigationProps) {
   const links = [
     { href: "/", label: "Home" },
+    { href: "/course", label: "Course" },
+    { href: "/companies", label: "Companies" },
     { href: "/about", label: "About" },
-    { href: "/contact", label: "Contact" },
+    { href: "/enroll", label: "Enroll" },
   ];
 
   const baseClasses = mobile

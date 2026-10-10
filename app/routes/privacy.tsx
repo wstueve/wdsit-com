@@ -3,10 +3,10 @@ import { Layout } from "~/components/Layout";
 
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "Privacy Policy - WDS IT Shopify Apps" },
-    { name: "description", content: "Privacy policy for WDS IT Shopify applications and services" },
+    { title: "Privacy Policy - WDS IT" },
+    { name: "description", content: "Privacy policy for WDS IT, LLC." },
     { property: "og:title", content: "Privacy Policy - WDS IT" },
-    { property: "og:description", content: "Privacy policy for WDS IT Shopify applications and services" },
+    { property: "og:description", content: "Privacy policy for WDS IT, LLC." },
   ];
 }
 
@@ -23,25 +23,28 @@ export default function Privacy() {
           <section className="mb-8">
             <h2 className="mb-4">1. Information We Collect</h2>
             <p className="text-gray-700 dark:text-gray-300 mb-4">
-              WDS IT, LLC ("we," "our," or "us") collects information you provide directly to us when using our Shopify applications and services. This may include:
+              WDS IT, LLC ("we," "our," or "us") teaches people how to use AI in their work. When you use this site, enroll, or email us, we collect information you give us. This may include:
             </p>
             <ul className="list-disc pl-6 text-gray-700 dark:text-gray-300 mb-4 space-y-2">
-              <li>Store information and configuration data necessary for app functionality</li>
-              <li>Product, order, and customer data as required by the specific app features you use</li>
-              <li>Usage analytics to improve our services and provide technical support</li>
-              <li>Communication preferences and support inquiries</li>
+              <li>Your name, email address, role, and the work task you want help with</li>
+              <li>Payment details processed by our payment provider when you buy the course or private sessions</li>
+              <li>Messages you send to support@wds-it.com</li>
+              <li>Basic technical data such as browser type, which we use to keep the site working</li>
             </ul>
+            <p className="text-gray-700 dark:text-gray-300 mb-4">
+              What you type into an AI assistant such as ChatGPT, Copilot, or Gemini goes to that provider, not to us, unless you choose to share it in a session or an email.
+            </p>
           </section>
 
           <section className="mb-8">
             <h2 className="mb-4">2. How We Use Your Information</h2>
             <p className="text-gray-700 dark:text-gray-300 mb-4">We use the information we collect to:</p>
             <ul className="list-disc pl-6 text-gray-700 dark:text-gray-300 mb-4 space-y-2">
-              <li>Provide, maintain, and improve our Shopify applications</li>
-              <li>Process transactions and provide customer support</li>
-              <li>Send you technical notices and support messages</li>
-              <li>Analyze usage patterns to enhance app performance and features</li>
-              <li>Comply with legal obligations and protect our legitimate business interests</li>
+              <li>Deliver the course, private sessions, and related emails</li>
+              <li>Process your payment and provide support</li>
+              <li>Send scheduling and class-access messages</li>
+              <li>Keep the site reliable and secure</li>
+              <li>Comply with legal obligations</li>
             </ul>
           </section>
 
@@ -86,9 +89,9 @@ export default function Privacy() {
           </section>
 
           <section className="mb-8">
-            <h2 className="mb-4">7. Shopify Integration</h2>
+            <h2 className="mb-4">7. Payments and email</h2>
             <p className="text-gray-700 dark:text-gray-300 mb-4">
-              Our applications integrate with Shopify's platform. Your use of Shopify services is also governed by Shopify's Privacy Policy. We access and process your Shopify store data only as necessary to provide our app functionality.
+              Card payments are handled by Stripe. Delivery of our emails is handled by our email provider. Those companies process the data they need to complete the payment or send the message, under their own terms.
             </p>
           </section>
 
@@ -105,7 +108,7 @@ export default function Privacy() {
               If you have any questions about this Privacy Policy, please contact us:
             </p>
             <div className="bg-white/80 dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700">
-              <p className="text-gray-700 dark:text-gray-300 mb-2"><strong>Email:</strong> <a href="mailto:support@wds-it.com" className="text-primary-600 dark:text-primary-400 hover:underline">support@wds-it.com</a></p>
+              <p className="text-gray-700 dark:text-gray-300 mb-2"><strong>Email:</strong> <a href="mailto:support@wds-it.com" className="text-primary-600 dark:text-primary-400 underline">support@wds-it.com</a></p>
               <p className="text-gray-700 dark:text-gray-300"><strong>Address:</strong> WDS IT, LLC, Olathe, KS</p>
             </div>
           </section>

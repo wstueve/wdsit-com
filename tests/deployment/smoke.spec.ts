@@ -10,7 +10,9 @@ test.describe("Deployment Smoke Tests", () => {
     const pages = [
       { url: "/", title: /WDS IT/ },
       { url: "/about", title: /About WDS IT/ },
-      { url: "/contact", title: /Contact/ },
+      { url: "/course", title: /Course/ },
+      { url: "/companies", title: /Companies/ },
+      { url: "/enroll", title: /Enroll/ },
       { url: "/privacy", title: /Privacy Policy/ },
       { url: "/terms", title: /Terms of Service/ },
     ];
